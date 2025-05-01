@@ -1,15 +1,24 @@
 package com.muhamaddzikri0103.bookshelf.ui.screen
 
+import android.content.ContentValues.TAG
 import android.content.res.Configuration
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,6 +53,20 @@ fun MainScreen() {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+
+                    Log.d(TAG, "FAB clicked")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.add_book),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     ) { innerPadding ->
         ScreenContent(Modifier.padding(innerPadding))
@@ -70,10 +93,14 @@ fun ScreenContent(modifier: Modifier = Modifier) {
     }
     else {
         LazyColumn(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 84.dp)
         ) {
             items(data) {
-                ListItem(bookNreading = it)
+                ListItem(bookNreading = it) {
+
+                    Log.d(TAG, "Book clicked: ${it.book.title}")
+                }
                 HorizontalDivider()
             }
         }
@@ -81,7 +108,7 @@ fun ScreenContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ListItem(bookNreading: BookAndReading) {
+fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
     val numOfPages: Int = bookNreading.book.numOfPages
     val currentPage: Int = bookNreading.reading.currentPage
     val pagesLeft: Int = numOfPages - currentPage
@@ -89,7 +116,9 @@ fun ListItem(bookNreading: BookAndReading) {
     val pctFormat = String.format(Locale.US, "%.0f", pct)
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier.fillMaxWidth()
+            .padding(16.dp)
+            .clickable { onClick() },
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(

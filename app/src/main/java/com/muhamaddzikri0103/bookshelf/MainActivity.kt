@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.muhamaddzikri0103.bookshelf.ui.screen.MainScreen
+import com.muhamaddzikri0103.bookshelf.navigation.SetupNavGraph
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BookShelfTheme {
-                MainScreen()
+                SetupNavGraph()
             }
         }
     }

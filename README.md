@@ -1,5 +1,5 @@
 # BookShelf
-### A simple booj reading tracking app
+### A simple book reading tracking app
 
 
 Nama: Muhamad Dzikriansyah

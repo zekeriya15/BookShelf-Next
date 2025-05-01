@@ -2,4 +2,22 @@
     <string name="app_name">BookShelf</string>
     <string name="empty_list">There is no data to show.\nCreate one to start.</string>
     <string name="add_book">Add book</string>
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="genre">Genre</string>
+    <string name="page_num">Number of pages</string>
+    <string name="curr_page">Current page</string>
+
+    <string name="romance">Romance</string>
+    <string name="mystery">Mystery/Thriller</string>
+    <string name="horror">Horror</string>
+    <string name="fantasy">Fantasy</string>
+    <string name="scifi">Science Fiction (Sci-Fi)</string>
+    <string name="biography">Biography/Autobiography</string>
+    <string name="self_help">Self-Help</string>
+    <string name="psychology">Psychology</string>
+    <string name="history">History</string>
+    <string name="education">Education</string>
+
+
 </resources>

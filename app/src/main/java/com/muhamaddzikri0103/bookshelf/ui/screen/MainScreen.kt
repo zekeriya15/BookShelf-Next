@@ -143,7 +143,7 @@ fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainScreenPreview() {
     BookShelfTheme {
         MainScreen()
     }

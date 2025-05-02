@@ -1,8 +1,6 @@
 package com.muhamaddzikri0103.bookshelf.ui.screen
 
-import android.content.ContentValues.TAG
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -71,12 +68,12 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(Modifier.padding(innerPadding))
+        ScreenContent(navController, Modifier.padding(innerPadding))
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier = Modifier) {
+fun ScreenContent(navController: NavHostController, modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
     val data = viewModel.data
 //    val data = emptyList<BookAndReading>()
@@ -100,8 +97,7 @@ fun ScreenContent(modifier: Modifier = Modifier) {
         ) {
             items(data) {
                 ListItem(bookNreading = it) {
-
-                    Log.d(TAG, "Book clicked: ${it.book.title}")
+                    navController.navigate(Screen.DetailScreen.withId(it.id))
                 }
                 HorizontalDivider()
             }
@@ -134,9 +130,9 @@ fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Text(text = "$pagesLeft / $numOfPages pages left" )
+        Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
         Text(
-            text = "$pctFormat% completed",
+            text = stringResource(R.string.x_completed, pctFormat),
             fontWeight = FontWeight.SemiBold
         )
     }

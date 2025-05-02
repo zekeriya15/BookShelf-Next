@@ -4,11 +4,19 @@
     <string name="add_book">Add new book</string>
     <string name="title">Title</string>
     <string name="author">Author</string>
+    <string name="author_x">Author %1$s</string>
     <string name="genre">Genre</string>
+    <string name="genre_x">Genre: %1$s</string>
     <string name="page_num">Number of pages</string>
+    <string name="total_pages_x">Total pages: %1$s</string>
     <string name="curr_page">Current page</string>
     <string name="back">Back</string>
     <string name="save">Save</string>
+    <string name="reading_detail">Reading detail</string>
+    <string name="other">Other options</string>
+    <string name="x_left_x">%1$s of %2$s pages left</string>
+    <string name="x_left">%1$s pages left</string>
+    <string name="x_completed">%1$s%% completed</string>
 
     <string name="romance">Romance</string>
     <string name="mystery">Mystery/Thriller</string>
@@ -20,6 +28,4 @@
     <string name="psychology">Psychology</string>
     <string name="history">History</string>
     <string name="education">Education</string>
-
-
 </resources>

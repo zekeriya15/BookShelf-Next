@@ -11,7 +11,7 @@ class MainViewModel : ViewModel() {
         BookAndReading(
             id = 1,
             Book(1,
-                "Harry Potter Harry Potter and the Philosopher's Stone",
+                "Harry Potter and the Philosopher's Stone",
                 "JK.Rowling",
                 "Fantasy",
                 450

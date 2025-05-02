@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -26,8 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,21 +48,24 @@ import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.Book
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.model.Reading
+import com.muhamaddzikri0103.bookshelf.navigation.Screen
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 import java.util.Locale
 
-const val READING_KEY_ID = "readingId"
+const val READING_DETAIL_KEY_ID = "readingDetailId"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavHostController, id: Long? = null) {
+fun DetailScreen(navController: NavHostController, id: Long) {
     val viewModel: MainViewModel = viewModel()
-    var data by remember { mutableStateOf<BookAndReading?>(null) }
+//    var data by remember { mutableStateOf<BookAndReading?>(null) }
 
-    LaunchedEffect(Unit) {
-        if (id == null) return@LaunchedEffect
-        data = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
-    }
+//    LaunchedEffect(Unit) {
+//      if (id == null) return@LaunchedEffect
+//        data = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
+//    }
+
+    val data = viewModel.getBookAndReading(id) ?: return
 
     Scaffold(
         topBar = {
@@ -86,19 +91,49 @@ fun DetailScreen(navController: NavHostController, id: Long? = null) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.other),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    UpdateNDelete(navController, id)
                 }
             )
         }
     ) { innerPadding ->
-        data?.let { ReadingDetail(data = it, modifier = Modifier.padding(innerPadding)) }
+        ReadingDetail(data, modifier = Modifier.padding(innerPadding))
     }
+}
+
+@Composable
+fun UpdateNDelete(navController: NavHostController, id: Long) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { expanded = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.other),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(text = stringResource(R.string.edit_book))
+                },
+                onClick = {
+                    expanded = false
+                    navController.navigate(Screen.UpdateForm.withId(id))
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(text = stringResource(R.string.delete_book))
+                },
+                onClick = {
+                    expanded = false
+                }
+            )
+        }
+    }
+
 }
 
 @Composable
@@ -107,7 +142,7 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
     val author = data.book.author
     val genre = data.book.genre
     val numOfPages = data.book.numOfPages
-    var currentPage by remember { mutableStateOf(data.reading.currentPage) }
+    var currentPage by remember { mutableIntStateOf(data.reading.currentPage) }
 
     val pagesLeft: Int = numOfPages - currentPage
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
@@ -158,7 +193,6 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Start
             )
             ButtonNCounter(currentPage, pagesLeft)
-
         }
     }
 }
@@ -169,8 +203,8 @@ fun ButtonNCounter(
     pagesLeft: Int
 ) {
     var isClicked by remember { mutableStateOf(false) }
-    var amount by remember { mutableStateOf(0) }
-    var totalPagesRead by remember { mutableStateOf(0) }
+    var amount by remember { mutableIntStateOf(0) }
+    var totalPagesRead by remember { mutableIntStateOf(0) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

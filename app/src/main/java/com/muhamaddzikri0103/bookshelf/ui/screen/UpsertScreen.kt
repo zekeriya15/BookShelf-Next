@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelf.R
@@ -44,7 +44,9 @@ import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpsertScreen(navController: NavHostController) {
+fun UpsertScreen(navController: NavHostController, id: Long? = null) {
+val viewModel: MainViewModel = viewModel()
+
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
     
@@ -66,6 +68,16 @@ fun UpsertScreen(navController: NavHostController) {
     var pages by remember { mutableStateOf("") }
     var currPages by remember { mutableStateOf("") }
 
+    LaunchedEffect(Unit) {
+        if (id == null) return@LaunchedEffect
+        val bookAndReading = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
+        title = bookAndReading.book.title
+        author = bookAndReading.book.author
+        genre = bookAndReading.book.genre
+        pages = bookAndReading.book.numOfPages.toString()
+        currPages = bookAndReading.reading.currentPage.toString()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,7 +91,10 @@ fun UpsertScreen(navController: NavHostController) {
                     }
                 },
                 title = {
-                    Text(text = stringResource(id = R.string.add_book))
+                    if (id == null)
+                        Text(text = stringResource(id = R.string.add_book))
+                    else
+                        Text(text = stringResource(id = R.string.edit_book))
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -98,6 +113,7 @@ fun UpsertScreen(navController: NavHostController) {
         }
     ) { padding ->
         BookForm(
+            id = id,
             title = title,
             onTitleChange = { title = it },
             author = author,
@@ -117,6 +133,7 @@ fun UpsertScreen(navController: NavHostController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookForm(
+    id: Long? = null,
     title: String, onTitleChange: (String) -> Unit,
     author: String, onAuthorChange: (String) -> Unit,
     genre: String, onGenreChange: (String) -> Unit,
@@ -165,22 +182,24 @@ fun BookForm(
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
+                imeAction = if (id == null) ImeAction.Done else ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        HorizontalDivider()
-        OutlinedTextField(
-            value = currPages,
-            onValueChange = { onCurrPagesChange(it) },
-            label = { Text(text = stringResource(R.string.curr_page)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (id != null) {
+            HorizontalDivider()
+            OutlinedTextField(
+                value = currPages,
+                onValueChange = { onCurrPagesChange(it) },
+                label = { Text(text = stringResource(R.string.curr_page)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

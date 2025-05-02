@@ -34,14 +34,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
+import com.muhamaddzikri0103.bookshelf.navigation.Screen
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,8 +60,7 @@ fun MainScreen() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-
-                    Log.d(TAG, "FAB clicked")
+                    navController.navigate(Screen.InsertForm.route)
                 }
             ) {
                 Icon(
@@ -145,6 +147,6 @@ fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
 @Composable
 fun MainScreenPreview() {
     BookShelfTheme {
-        MainScreen()
+        MainScreen(rememberNavController())
     }
 }

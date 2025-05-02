@@ -17,6 +17,11 @@
     <string name="x_left_x">%1$s of %2$s pages left</string>
     <string name="x_left">%1$s pages left</string>
     <string name="x_completed">%1$s%% completed</string>
+    <string name="update_progress">Update progress</string>
+    <string name="pages_read">How many pages have you read?</string>
+    <string name="add">Add</string>
+    <string name="minus">Minus</string>
+    <string name="add_page">Add pages</string>
 
     <string name="romance">Romance</string>
     <string name="mystery">Mystery/Thriller</string>

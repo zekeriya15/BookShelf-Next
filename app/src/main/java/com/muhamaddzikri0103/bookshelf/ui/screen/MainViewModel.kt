@@ -107,8 +107,23 @@ class MainViewModel : ViewModel() {
                 450
             ),
             Reading(
-                5,
+                7,
                 90,
+                false,
+                7
+            )
+        ),
+        BookAndReading(
+            id = 8,
+            Book(8,
+                "Test",
+                "JK.Rowling",
+                "Fantasy",
+                10
+            ),
+            Reading(
+                8,
+                1,
                 false,
                 7
             )

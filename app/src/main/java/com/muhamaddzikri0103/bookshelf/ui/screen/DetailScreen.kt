@@ -3,12 +3,19 @@ package com.muhamaddzikri0103.bookshelf.ui.screen
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -26,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -108,7 +116,8 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -118,7 +127,7 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Start
             )
             HorizontalDivider()
@@ -134,20 +143,120 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.total_pages_x, numOfPages.toString()),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 text = stringResource(R.string.x_left, pagesLeft.toString()),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 text = stringResource(R.string.x_completed, pctFormat),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Start
             )
+            ButtonNCounter(currentPage, pagesLeft)
+
+        }
+    }
+}
+
+@Composable
+fun ButtonNCounter(
+    currentPage: Int,
+    pagesLeft: Int
+) {
+    var isClicked by remember { mutableStateOf(false) }
+    var amount by remember { mutableStateOf(0) }
+    var totalPagesRead by remember { mutableStateOf(0) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = { isClicked = !isClicked },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text(text = stringResource(R.string.update_progress))
+        }
+
+        if (isClicked) {
+            Column(modifier = Modifier.padding(top = 16.dp, bottom = 5.dp)) {
+                Text(text = stringResource(R.string.pages_read))
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        if (amount != 0) {
+                            amount--
+                        }
+                    },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_remove_24),
+                        contentDescription = stringResource(R.string.minus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text(
+                    text = amount.toString(),
+                    style = MaterialTheme.typography.headlineLarge,
+                    textAlign = TextAlign.Center
+                )
+                IconButton(
+                    onClick = {
+                        if (amount >= 0 && amount < pagesLeft) {
+                            amount++
+                        }
+                    },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.add),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(
+                    onClick = {
+                        isClicked = false
+                        totalPagesRead = currentPage + amount
+                        amount = 0
+                    },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp)
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = stringResource(R.string.add_page),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
         }
     }
 }

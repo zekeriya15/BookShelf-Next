@@ -1,7 +1,12 @@
 package com.muhamaddzikri0103.bookshelf.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "books")
 data class Book(
-    val id: Long,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
     val title: String,
     val author: String,
     val genre: String,

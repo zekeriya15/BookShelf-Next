@@ -1,9 +1,14 @@
 package com.muhamaddzikri0103.bookshelf.model
 
 data class BookAndReading(
-    val id: Long,
+    val bookId: Long,
+    val title: String,
+    val author: String,
+    val genre: String,
+    val numOfPages: Int,
 
-    val book: Book,
-
-    val reading: Reading
+    val readingId: Long,
+    val currentPage: Int,
+    val dateModified: String,
+    val isDeleted: Boolean
 )

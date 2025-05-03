@@ -71,11 +71,11 @@ val viewModel: MainViewModel = viewModel()
     LaunchedEffect(Unit) {
         if (id == null) return@LaunchedEffect
         val bookAndReading = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
-        title = bookAndReading.book.title
-        author = bookAndReading.book.author
-        genre = bookAndReading.book.genre
-        pages = bookAndReading.book.numOfPages.toString()
-        currPages = bookAndReading.reading.currentPage.toString()
+        title = bookAndReading.title
+        author = bookAndReading.author
+        genre = bookAndReading.genre
+        pages = bookAndReading.numOfPages.toString()
+        currPages = bookAndReading.currentPage.toString()
     }
 
     Scaffold(

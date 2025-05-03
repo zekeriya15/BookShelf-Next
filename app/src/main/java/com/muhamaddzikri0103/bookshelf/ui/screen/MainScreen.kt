@@ -22,8 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +40,7 @@ import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
+import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,8 +78,10 @@ fun MainScreen(navController: NavHostController) {
 
 @Composable
 fun ScreenContent(navController: NavHostController, modifier: Modifier = Modifier) {
-    val viewModel: MainViewModel = viewModel()
-    val data = viewModel.data
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: MainViewModel = viewModel(factory = factory)
+    val data by viewModel.data.collectAsState()
 //    val data = emptyList<BookAndReading>()
 
     if (data.isEmpty()) {
@@ -97,7 +103,7 @@ fun ScreenContent(navController: NavHostController, modifier: Modifier = Modifie
         ) {
             items(data) {
                 ListItem(bookNreading = it) {
-                    navController.navigate(Screen.DetailScreen.withId(it.id))
+                    navController.navigate(Screen.DetailScreen.withId(it.readingId))
                 }
                 HorizontalDivider()
             }
@@ -107,8 +113,8 @@ fun ScreenContent(navController: NavHostController, modifier: Modifier = Modifie
 
 @Composable
 fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
-    val numOfPages: Int = bookNreading.book.numOfPages
-    val currentPage: Int = bookNreading.reading.currentPage
+    val numOfPages: Int = bookNreading.numOfPages
+    val currentPage: Int = bookNreading.currentPage
     val pagesLeft: Int = numOfPages - currentPage
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
     val pctFormat = String.format(Locale.US, "%.0f", pct)
@@ -120,13 +126,13 @@ fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = bookNreading.book.title,
+            text = bookNreading.title,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = bookNreading.book.author,
+            text = bookNreading.author,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

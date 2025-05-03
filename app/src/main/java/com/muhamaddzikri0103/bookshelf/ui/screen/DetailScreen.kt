@@ -45,11 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.muhamaddzikri0103.bookshelf.R
-import com.muhamaddzikri0103.bookshelf.model.Book
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
-import com.muhamaddzikri0103.bookshelf.model.Reading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
-import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 import java.util.Locale
 
 const val READING_DETAIL_KEY_ID = "readingDetailId"
@@ -138,11 +135,11 @@ fun UpdateNDelete(navController: NavHostController, id: Long) {
 
 @Composable
 fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
-    val title = data.book.title
-    val author = data.book.author
-    val genre = data.book.genre
-    val numOfPages = data.book.numOfPages
-    var currentPage by remember { mutableIntStateOf(data.reading.currentPage) }
+    val title = data.title
+    val author = data.author
+    val genre = data.genre
+    val numOfPages = data.numOfPages
+    var currentPage by remember { mutableIntStateOf(data.currentPage) }
 
     val pagesLeft: Int = numOfPages - currentPage
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
@@ -299,24 +296,24 @@ fun ButtonNCounter(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun ReadingDetailPreview() {
-    val mockData = BookAndReading(
-        id = 1,
-        book = Book(
-            id = 1,
-            title = "Harry Potter and the Philosopher's Stone",
-            author = "J.K. Rowling",
-            genre = "Fantasy",
-            numOfPages = 450
-        ),
-        reading = Reading(
-            id = 1,
-            currentPage = 30,
-            isDeleted = false,
-            bookId = 1
-        )
-    )
-
-    BookShelfTheme {
-        ReadingDetail(mockData)
-    }
+//    val mockData = BookAndReading(
+//        id = 1,
+//        book = Book(
+//            id = 1,
+//            title = "Harry Potter and the Philosopher's Stone",
+//            author = "J.K. Rowling",
+//            genre = "Fantasy",
+//            numOfPages = 450
+//        ),
+//        reading = Reading(
+//            id = 1,
+//            currentPage = 30,
+//            isDeleted = false,
+//            bookId = 1
+//        )
+//    )
+//
+//    BookShelfTheme {
+//        ReadingDetail(mockData)
+//    }
 }

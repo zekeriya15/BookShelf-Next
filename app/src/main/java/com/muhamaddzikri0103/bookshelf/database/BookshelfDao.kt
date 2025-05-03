@@ -104,5 +104,21 @@ interface BookshelfDao {
     """)
     fun getDeletedBookAndReading(): Flow<List<BookAndReading>>
 
-
+    @Query("""
+    SELECT 
+        books.id AS bookId,
+        books.title,
+        books.author,
+        books.genre,
+        books.numOfPages,
+        readings.id AS readingId,
+        readings.currentPage,
+        readings.dateModified,
+        readings.isDeleted
+    FROM books
+    INNER JOIN readings ON books.id = readings.bookId
+    WHERE readings.id = :readingId
+    ORDER BY readings.dateModified DESC
+     """)
+    fun getBookAndReadingByReadingId(readingId: Long): Flow<BookAndReading>
 }

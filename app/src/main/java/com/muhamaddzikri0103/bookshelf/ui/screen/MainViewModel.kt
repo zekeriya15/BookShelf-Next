@@ -18,9 +18,6 @@ class MainViewModel(dao: BookshelfDao) : ViewModel() {
         initialValue = emptyList()
     )
 
-    fun getBookAndReading(readingId: Long): BookAndReading? {
-        return data.value.find { it.readingId == readingId }
-    }
 
 //    val data = listOf(
 //        BookAndReading(

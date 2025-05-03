@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +49,7 @@ import androidx.navigation.NavHostController
 import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
+import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
 import java.util.Locale
 
 const val READING_DETAIL_KEY_ID = "readingDetailId"
@@ -54,7 +57,9 @@ const val READING_DETAIL_KEY_ID = "readingDetailId"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(navController: NavHostController, id: Long) {
-    val viewModel: MainViewModel = viewModel()
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: DetailViewModel = viewModel(factory = factory)
 //    var data by remember { mutableStateOf<BookAndReading?>(null) }
 
 //    LaunchedEffect(Unit) {
@@ -62,7 +67,9 @@ fun DetailScreen(navController: NavHostController, id: Long) {
 //        data = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
 //    }
 
-    val data = viewModel.getBookAndReading(id) ?: return
+    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
+
+    if (data == null) return
 
     Scaffold(
         topBar = {
@@ -93,7 +100,7 @@ fun DetailScreen(navController: NavHostController, id: Long) {
             )
         }
     ) { innerPadding ->
-        ReadingDetail(data, modifier = Modifier.padding(innerPadding))
+        ReadingDetail(data!!, modifier = Modifier.padding(innerPadding))
     }
 }
 

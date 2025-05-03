@@ -10,5 +10,5 @@ data class Reading(
     val currentPage: Int = 0,
     val dateModified: String,
     val isDeleted: Boolean = false,
-    val bookId: Long
+    val bookId: Long = 0L
 )

@@ -1,6 +1,7 @@
 package com.muhamaddzikri0103.bookshelf.ui.screen
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -40,12 +42,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelf.R
+import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
+import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpsertScreen(navController: NavHostController, id: Long? = null) {
-val viewModel: MainViewModel = viewModel()
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: UpsertViewModel = viewModel(factory = factory)
 
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
@@ -67,15 +75,18 @@ val viewModel: MainViewModel = viewModel()
     var genre by remember { mutableStateOf(radioOptions[0]) }
     var pages by remember { mutableStateOf("") }
     var currPages by remember { mutableStateOf("") }
+    var dateModified by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(id) {
         if (id == null) return@LaunchedEffect
-        val bookAndReading = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
-        title = bookAndReading.title
-        author = bookAndReading.author
-        genre = bookAndReading.genre
-        pages = bookAndReading.numOfPages.toString()
-        currPages = bookAndReading.currentPage.toString()
+        viewModel.getBookAndReadingById(id).collectLatest { bookAndReading ->
+            title = bookAndReading.title
+            author = bookAndReading.author
+            genre = bookAndReading.genre
+            pages = bookAndReading.numOfPages.toString()
+            currPages = bookAndReading.currentPage.toString()
+            dateModified = bookAndReading.dateModified
+        }
     }
 
     Scaffold(
@@ -101,7 +112,18 @@ val viewModel: MainViewModel = viewModel()
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
+                            && id == null
+                        ) {
+                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
+                            return@IconButton
+                        }
+                        if (id == null) {
+                            viewModel.insert(title, author, genre, pages)
+                        }
+                        navController.popBackStack()
+                    }) {
                         Icon(
                             imageVector = Icons.Outlined.Check,
                             contentDescription = stringResource(R.string.save),

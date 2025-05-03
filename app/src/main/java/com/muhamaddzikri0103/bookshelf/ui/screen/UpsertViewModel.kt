@@ -2,7 +2,6 @@ package com.muhamaddzikri0103.bookshelf.ui.screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.muhamaddzikri0103.bookshelf.database.BookshelfDao
 import com.muhamaddzikri0103.bookshelf.model.Book
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
@@ -41,4 +40,34 @@ class UpsertViewModel(private val dao: BookshelfDao) : ViewModel() {
     fun getBookAndReadingById(readingId: Long): Flow<BookAndReading> {
         return dao.getBookAndReadingByReadingId(readingId)
     }
+
+    fun update(
+        bookId: Long,
+        title: String,
+        author: String,
+        genre: String,
+        numOfPages: String,
+        readingId: Long,
+        currentPage: String,
+        dateModified: String = formatter.format(Date())
+    ) {
+        val book = Book(
+            id = bookId,
+            title = title,
+            author = author,
+            genre = genre,
+            numOfPages = numOfPages.toInt()
+        )
+        val reading = Reading(
+            id = readingId,
+            bookId = bookId,
+            currentPage = currentPage.toIntOrNull() ?: 0,
+            dateModified = dateModified
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.updateBookAndReading(book, reading)
+        }
+    }
+
 }

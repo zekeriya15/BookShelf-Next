@@ -50,22 +50,21 @@ import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
 import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 const val READING_DETAIL_KEY_ID = "readingDetailId"
+
+private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(navController: NavHostController, id: Long) {
     val context = LocalContext.current
     val factory = ViewModelFactory(context)
-    val viewModel: DetailViewModel = viewModel(factory = factory)
-//    var data by remember { mutableStateOf<BookAndReading?>(null) }
-
-//    LaunchedEffect(Unit) {
-//      if (id == null) return@LaunchedEffect
-//        data = viewModel.getBookAndReading(id) ?: return@LaunchedEffect
-//    }
+    val viewModel: UpsertViewModel = viewModel(factory = factory)
 
     val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
 
@@ -100,7 +99,7 @@ fun DetailScreen(navController: NavHostController, id: Long) {
             )
         }
     ) { innerPadding ->
-        ReadingDetail(data!!, modifier = Modifier.padding(innerPadding))
+        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
     }
 }
 
@@ -141,11 +140,12 @@ fun UpdateNDelete(navController: NavHostController, id: Long) {
 }
 
 @Composable
-fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
+fun ReadingDetail(data: BookAndReading, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
     val title = data.title
     val author = data.author
     val genre = data.genre
     val numOfPages = data.numOfPages
+    var dateModified by remember { mutableStateOf(data.dateModified) }
     var currentPage by remember { mutableIntStateOf(data.currentPage) }
 
     val pagesLeft: Int = numOfPages - currentPage
@@ -196,16 +196,36 @@ fun ReadingDetail(data: BookAndReading, modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Start
             )
-            ButtonNCounter(currentPage, pagesLeft)
+
+            val formattedDate = try {
+                val parsedDate = formatter.parse(dateModified)
+                outputFormatter.format(parsedDate!!)
+            } catch (e: Exception) {
+                dateModified
+            }
+            Text(
+                text = stringResource(R.string.last_updated_x, formattedDate),
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Start
+            )
+            ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
+                currentPage = it
+            }, onDateModifiedUpdate = {
+                dateModified = it
+            })
         }
     }
 }
 
 @Composable
 fun ButtonNCounter(
-    currentPage: Int,
-    pagesLeft: Int
+    data: BookAndReading,
+    pagesLeft: Int,
+    viewModel: UpsertViewModel,
+    onProgressUpdate: (Int) -> Unit,
+    onDateModifiedUpdate: (String) -> Unit
 ) {
+    var currentPage by remember { mutableIntStateOf(data.currentPage) }
     var isClicked by remember { mutableStateOf(false) }
     var amount by remember { mutableIntStateOf(0) }
     var totalPagesRead by remember { mutableIntStateOf(0) }
@@ -281,6 +301,22 @@ fun ButtonNCounter(
                         isClicked = false
                         totalPagesRead = currentPage + amount
                         amount = 0
+                        val formattedNow = formatter.format(Date())
+
+                        viewModel.update(
+                            bookId = data.bookId,
+                            title = data.title,
+                            author = data.author,
+                            genre = data.genre,
+                            numOfPages = data.numOfPages.toString(),
+                            readingId = data.readingId,
+                            currentPage = totalPagesRead.toString(),
+                            dateModified = formattedNow
+                        )
+
+                        currentPage = totalPagesRead
+                        onProgressUpdate(totalPagesRead)
+                        onDateModifiedUpdate(formattedNow)
                     },
                     modifier = Modifier
                         .size(56.dp)

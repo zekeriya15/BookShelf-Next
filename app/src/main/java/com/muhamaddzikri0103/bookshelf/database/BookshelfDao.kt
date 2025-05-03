@@ -121,4 +121,8 @@ interface BookshelfDao {
     ORDER BY readings.dateModified DESC
      """)
     fun getBookAndReadingByReadingId(readingId: Long): Flow<BookAndReading>
+
+    @Query("UPDATE readings SET currentPage = :currentPage WHERE id = :readingId")
+    suspend fun updateCurrentPage(readingId: Long, currentPage: Int)
+
 }

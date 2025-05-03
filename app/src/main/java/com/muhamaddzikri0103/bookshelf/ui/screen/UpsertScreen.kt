@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,10 +43,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelf.R
-import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
 import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +54,7 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
     val factory = ViewModelFactory(context)
     val viewModel: UpsertViewModel = viewModel(factory = factory)
 
+    var bookId by remember { mutableLongStateOf(0) }
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
     
@@ -80,6 +80,7 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
     LaunchedEffect(id) {
         if (id == null) return@LaunchedEffect
         viewModel.getBookAndReadingById(id).collectLatest { bookAndReading ->
+            bookId = bookAndReading.bookId
             title = bookAndReading.title
             author = bookAndReading.author
             genre = bookAndReading.genre
@@ -119,8 +120,24 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
                             Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
                             return@IconButton
                         }
+                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0" || currPages == "")
+                            && id != null
+                        ) {
+                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
+                            return@IconButton
+                        }
                         if (id == null) {
                             viewModel.insert(title, author, genre, pages)
+                        } else {
+                            viewModel.update(
+                                bookId = bookId,
+                                title = title,
+                                author = author,
+                                genre = genre,
+                                numOfPages = pages,
+                                readingId = id,
+                                currentPage = currPages
+                            )
                         }
                         navController.popBackStack()
                     }) {
@@ -152,7 +169,6 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookForm(
     id: Long? = null,

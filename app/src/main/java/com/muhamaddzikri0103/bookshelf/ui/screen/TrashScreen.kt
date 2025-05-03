@@ -50,6 +50,12 @@ import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(navController: NavHostController) {
+    val context = LocalContext.current
+    val factory = ViewModelFactory(context)
+    val viewModel: TrashViewModel = viewModel(factory = factory)
+
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -70,26 +76,32 @@ fun TrashScreen(navController: NavHostController) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.other),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    DeleteAllMenu(onDelete = { showDeleteAllDialog = true })
                 }
             )
         }
     ) { innerPadding ->
-        TrashContent(Modifier.padding(innerPadding))
+        TrashContent(viewModel, Modifier.padding(innerPadding))
+
+        if (showDeleteAllDialog) {
+            DisplayAlertDialog(
+                displayText = stringResource(R.string.confirm_delete_all),
+                confirmText = stringResource(R.string.delete),
+                dismissText = stringResource(R.string.cancel),
+                onDismissRequest = { showDeleteAllDialog = false },
+                onConfirmation = {
+                    viewModel.deleteAllTrash()
+                    Toast.makeText(context, R.string.toast_deleted_all, Toast.LENGTH_SHORT).show()
+                    showDeleteAllDialog = false
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun TrashContent(modifier: Modifier = Modifier) {
+fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val factory = ViewModelFactory(context)
-    val viewModel: TrashViewModel = viewModel(factory = factory)
     val data by viewModel.data.collectAsState()
 //    val data = emptyList<BookAndReading>()
 
@@ -117,8 +129,7 @@ fun TrashContent(modifier: Modifier = Modifier) {
             items(data) { item ->
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -138,7 +149,6 @@ fun TrashContent(modifier: Modifier = Modifier) {
                 }
                 HorizontalDivider()
             }
-
         }
     }
 
@@ -186,6 +196,33 @@ fun TrashItemMenu(
             )
             DropdownMenuItem(
                 text = { Text(text = stringResource(R.string.delete_permanently)) },
+                onClick = {
+                    expanded = false
+                    onDelete()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun DeleteAllMenu(onDelete: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.other),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(text = stringResource(R.string.delete_all)) },
                 onClick = {
                     expanded = false
                     onDelete()

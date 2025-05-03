@@ -27,6 +27,11 @@ class TrashViewModel(private val dao: BookshelfDao) : ViewModel() {
         viewModelScope.launch {
             dao.hardDeleteBookAndReading(bookNReading)
         }
+    }
 
+    fun deleteAllTrash() {
+        viewModelScope.launch {
+            dao.hardDeleteAllTrash()
+        }
     }
 }

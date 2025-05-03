@@ -49,11 +49,6 @@ interface BookshelfDao {
     @Query("DELETE FROM books WHERE id = :id")
     suspend fun deleteBook(id: Long)
 
-//    @Transaction
-//    suspend fun softDeleteBookAndReading(bookAndReading: BookAndReading) {
-//        softDeleteReading(bookAndReading.readingId)
-//    }
-
     @Transaction
     suspend fun hardDeleteBookAndReading(bookAndReading: BookAndReading) {
         hardDeleteReading(bookAndReading.readingId)
@@ -80,11 +75,6 @@ interface BookshelfDao {
 
     @Query("UPDATE readings SET isDeleted = 0 WHERE id = :readingId")
     suspend fun restoreReading(readingId: Long)
-
-//    @Transaction
-//    suspend fun restoreBookAndReading(bookAndReading: BookAndReading) {
-//        restoreReading(bookAndReading.readingId)
-//    }
 
     @Query("""
     SELECT 
@@ -122,7 +112,24 @@ interface BookshelfDao {
      """)
     fun getBookAndReadingByReadingId(readingId: Long): Flow<BookAndReading>
 
-//    @Query("UPDATE readings SET currentPage = :currentPage WHERE id = :readingId")
-//    suspend fun updateCurrentPage(readingId: Long, currentPage: Int)
+    @Query("SELECT bookId FROM readings WHERE isDeleted = 1")
+    suspend fun getDeletedReadingsBookIds(): List<Long>
+
+    @Query("DELETE FROM readings WHERE isDeleted = 1")
+    suspend fun deleteAllDeletedReadings()
+
+    @Query("DELETE FROM books WHERE id IN (:bookIds)")
+    suspend fun deleteBooksByIds(bookIds: List<Long>)
+
+    @Transaction
+    suspend fun hardDeleteAllTrash() {
+        val bookIds = getDeletedReadingsBookIds()
+
+        deleteAllDeletedReadings()
+
+        if (bookIds.isNotEmpty()) {
+            deleteBooksByIds(bookIds)
+        }
+    }
 
 }

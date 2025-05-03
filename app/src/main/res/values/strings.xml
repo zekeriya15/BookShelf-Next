@@ -36,9 +36,12 @@
     <string name="toast_restore">Reading progress restored</string>
     <string name="delete_permanently">Delete permanently</string>
     <string name="confirm_delete">Are you sure you want to permanently delete this?</string>
+    <string name="confirm_delete_all">Are you sure you want to permanently delete all trash?</string>
     <string name="delete">Delete</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="toast_deleted">Reading progress permanently deleted</string>
+    <string name="toast_deleted_all">All reading progress permanently deleted</string>
+    <string name="delete_all">Delete all trash</string>
 
 
     <string name="romance">Romance</string>

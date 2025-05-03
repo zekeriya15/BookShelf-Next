@@ -12,4 +12,5 @@ sealed class Screen(val route: String) {
         fun withId(id: Long) = "upsertScreen/$id"
 
     }
+    data object TrashScreen: Screen("trashScreen")
 }

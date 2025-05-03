@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.muhamaddzikri0103.bookshelf.ui.screen.DetailScreen
 import com.muhamaddzikri0103.bookshelf.ui.screen.MainScreen
 import com.muhamaddzikri0103.bookshelf.ui.screen.READING_DETAIL_KEY_ID
+import com.muhamaddzikri0103.bookshelf.ui.screen.TrashScreen
 import com.muhamaddzikri0103.bookshelf.ui.screen.UpsertScreen
 
 @Composable
@@ -42,6 +43,9 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
            val id = navBackStackEntry.arguments?.getLong(READING_DETAIL_KEY_ID)
            UpsertScreen(navController, id)
 
+       }
+       composable(route = Screen.TrashScreen.route) {
+           TrashScreen(navController)
        }
    }
 }

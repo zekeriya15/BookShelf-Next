@@ -81,10 +81,10 @@ interface BookshelfDao {
     @Query("UPDATE readings SET isDeleted = 0 WHERE id = :readingId")
     suspend fun restoreReading(readingId: Long)
 
-    @Transaction
-    suspend fun restoreBookAndReading(bookAndReading: BookAndReading) {
-        restoreReading(bookAndReading.readingId)
-    }
+//    @Transaction
+//    suspend fun restoreBookAndReading(bookAndReading: BookAndReading) {
+//        restoreReading(bookAndReading.readingId)
+//    }
 
     @Query("""
     SELECT 

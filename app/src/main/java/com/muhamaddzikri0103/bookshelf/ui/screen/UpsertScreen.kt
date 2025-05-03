@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -114,8 +115,8 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
                 ),
                 actions = {
                     IconButton(onClick = {
-                        val curr = currPages.toIntOrNull()
-                        val total = pages.toIntOrNull()
+                        val curr = currPages.toIntOrNull() ?: 0
+                        val total = pages.toIntOrNull() ?: 0
 
                         if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
                             && id == null
@@ -123,13 +124,13 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
                             Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
                             return@IconButton
                         }
-                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0" || currPages == "")
+                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
                             && id != null
-                            ) {
+                        ) {
                             Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
                             return@IconButton
                         }
-                        if ((curr == null || total == null || curr > total) && id != null) {
+                        if ((curr > total) && id != null) {
                             Toast.makeText(context, R.string.invalid_pages, Toast.LENGTH_SHORT).show()
                             return@IconButton
                         }
@@ -222,7 +223,7 @@ fun BookForm(
 
         OutlinedTextField(
             value = pages,
-            onValueChange = { onPagesChange(it) },
+            onValueChange = { if (it.isDigitsOnly()) onPagesChange(it) },
             label = { Text(text = stringResource(R.string.page_num)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
@@ -235,7 +236,7 @@ fun BookForm(
             HorizontalDivider()
             OutlinedTextField(
                 value = currPages,
-                onValueChange = { onCurrPagesChange(it) },
+                onValueChange = { if (it.isDigitsOnly()) onCurrPagesChange(it) },
                 label = { Text(text = stringResource(R.string.curr_page)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(

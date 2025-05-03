@@ -114,6 +114,9 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
                 ),
                 actions = {
                     IconButton(onClick = {
+                        val curr = currPages.toIntOrNull()
+                        val total = pages.toIntOrNull()
+
                         if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
                             && id == null
                         ) {
@@ -122,8 +125,12 @@ fun UpsertScreen(navController: NavHostController, id: Long? = null) {
                         }
                         if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0" || currPages == "")
                             && id != null
-                        ) {
+                            ) {
                             Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
+                            return@IconButton
+                        }
+                        if ((curr == null || total == null || curr > total) && id != null) {
+                            Toast.makeText(context, R.string.invalid_pages, Toast.LENGTH_SHORT).show()
                             return@IconButton
                         }
                         if (id == null) {

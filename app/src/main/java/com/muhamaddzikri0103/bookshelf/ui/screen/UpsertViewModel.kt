@@ -70,4 +70,10 @@ class UpsertViewModel(private val dao: BookshelfDao) : ViewModel() {
         }
     }
 
+    fun softDelete(readingId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.softDeleteReading(readingId)
+        }
+    }
+
 }

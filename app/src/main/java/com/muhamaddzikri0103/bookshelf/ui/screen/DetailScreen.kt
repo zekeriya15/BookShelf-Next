@@ -1,6 +1,7 @@
 package com.muhamaddzikri0103.bookshelf.ui.screen
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -94,7 +95,11 @@ fun DetailScreen(navController: NavHostController, id: Long) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    UpdateNDelete(navController, id)
+                    UpdateNDelete(navController, id) {
+                        viewModel.softDelete(id)
+                        navController.popBackStack()
+                        Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
         }
@@ -104,7 +109,7 @@ fun DetailScreen(navController: NavHostController, id: Long) {
 }
 
 @Composable
-fun UpdateNDelete(navController: NavHostController, id: Long) {
+fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     IconButton(onClick = { expanded = true }) {
@@ -128,10 +133,11 @@ fun UpdateNDelete(navController: NavHostController, id: Long) {
             )
             DropdownMenuItem(
                 text = {
-                    Text(text = stringResource(R.string.delete_book))
+                    Text(text = stringResource(R.string.move_trash))
                 },
                 onClick = {
                     expanded = false
+                    onMoveClick()
                 }
             )
         }

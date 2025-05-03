@@ -49,6 +49,17 @@ interface BookshelfDao {
     @Query("DELETE FROM books WHERE id = :id")
     suspend fun deleteBook(id: Long)
 
+//    @Transaction
+//    suspend fun softDeleteBookAndReading(bookAndReading: BookAndReading) {
+//        softDeleteReading(bookAndReading.readingId)
+//    }
+
+    @Transaction
+    suspend fun hardDeleteBookAndReading(bookAndReading: BookAndReading) {
+        hardDeleteReading(bookAndReading.readingId)
+        deleteBook(bookAndReading.bookId)
+    }
+
     @Query("""
     SELECT 
         books.id AS bookId,
@@ -66,17 +77,6 @@ interface BookshelfDao {
     ORDER BY readings.dateModified DESC
      """)
     fun getBookAndReading(): Flow<List<BookAndReading>>
-
-    @Transaction
-    suspend fun softDeleteBookAndReading(bookAndReading: BookAndReading) {
-        softDeleteReading(bookAndReading.readingId)
-    }
-
-    @Transaction
-    suspend fun hardDeleteBookAndReading(bookAndReading: BookAndReading) {
-        hardDeleteReading(bookAndReading.readingId)
-        deleteBook(bookAndReading.bookId)
-    }
 
     @Query("UPDATE readings SET isDeleted = 0 WHERE id = :readingId")
     suspend fun restoreReading(readingId: Long)
@@ -122,7 +122,7 @@ interface BookshelfDao {
      """)
     fun getBookAndReadingByReadingId(readingId: Long): Flow<BookAndReading>
 
-    @Query("UPDATE readings SET currentPage = :currentPage WHERE id = :readingId")
-    suspend fun updateCurrentPage(readingId: Long, currentPage: Int)
+//    @Query("UPDATE readings SET currentPage = :currentPage WHERE id = :readingId")
+//    suspend fun updateCurrentPage(readingId: Long, currentPage: Int)
 
 }

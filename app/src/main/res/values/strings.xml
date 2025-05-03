@@ -24,8 +24,10 @@
     <string name="add_page">Add pages</string>
     <string name="edit_book">Edit book</string>
     <string name="delete_book">Delete book</string>
+    <string name="move_trash">Move to trash</string>
     <string name="invalid">All fields need to be filled</string>
     <string name="last_updated_x">Last updated: %1$s</string>
+    <string name="toast_move">Reading progress moved to trash</string>
 
     <string name="romance">Romance</string>
     <string name="mystery">Mystery/Thriller</string>

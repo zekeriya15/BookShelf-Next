@@ -42,6 +42,8 @@
     <string name="toast_deleted">Reading progress permanently deleted</string>
     <string name="toast_deleted_all">All reading progress permanently deleted</string>
     <string name="delete_all">Delete all trash</string>
+    <string name="list">List view</string>
+    <string name="grid">Grid view</string>
 
 
     <string name="romance">Romance</string>

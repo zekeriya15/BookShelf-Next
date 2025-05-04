@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.muhamaddzikri0103.bookshelf.database.BookshelfDb
-import com.muhamaddzikri0103.bookshelf.ui.screen.DetailViewModel
 import com.muhamaddzikri0103.bookshelf.ui.screen.MainViewModel
 import com.muhamaddzikri0103.bookshelf.ui.screen.TrashViewModel
 import com.muhamaddzikri0103.bookshelf.ui.screen.UpsertViewModel
@@ -19,8 +18,6 @@ class ViewModelFactory (
             return MainViewModel(dao) as T
         } else if (modelClass.isAssignableFrom(UpsertViewModel::class.java)) {
             return UpsertViewModel(dao) as T
-        } else if (modelClass.isAssignableFrom(DetailViewModel::class.java)) {
-            return DetailViewModel(dao) as T
         } else if (modelClass.isAssignableFrom(TrashViewModel::class.java)) {
             return TrashViewModel(dao) as T
         }

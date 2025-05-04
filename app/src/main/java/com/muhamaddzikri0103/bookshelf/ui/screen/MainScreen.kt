@@ -53,13 +53,18 @@ import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
 import com.muhamaddzikri0103.bookshelf.ui.theme.BookShelfTheme
+import com.muhamaddzikri0103.bookshelf.util.SettingsDataStore
 import com.muhamaddzikri0103.bookshelf.util.ViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
-    var showList by remember { mutableStateOf(true) }
+    val dataStore = SettingsDataStore(LocalContext.current)
+    val showList by dataStore.layoutFlow.collectAsState(true)
 
     Scaffold(
         topBar = {
@@ -72,7 +77,11 @@ fun MainScreen(navController: NavHostController) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(onClick = { showList = !showList }) {
+                    IconButton(onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                        dataStore.saveLayout(!showList)
+                        }
+                    }) {
                         Icon(
                             painter = painterResource(
                                 if (showList) R.drawable.baseline_grid_view_24

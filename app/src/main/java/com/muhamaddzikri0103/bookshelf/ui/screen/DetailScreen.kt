@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelf.R
 import com.muhamaddzikri0103.bookshelf.model.BookAndReading
 import com.muhamaddzikri0103.bookshelf.navigation.Screen
@@ -68,7 +69,6 @@ fun DetailScreen(navController: NavHostController, id: Long) {
     val viewModel: UpsertViewModel = viewModel(factory = factory)
 
     val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
-
     if (data == null) return
 
     Scaffold(
@@ -345,24 +345,5 @@ fun ButtonNCounter(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun ReadingDetailPreview() {
-//    val mockData = BookAndReading(
-//        id = 1,
-//        book = Book(
-//            id = 1,
-//            title = "Harry Potter and the Philosopher's Stone",
-//            author = "J.K. Rowling",
-//            genre = "Fantasy",
-//            numOfPages = 450
-//        ),
-//        reading = Reading(
-//            id = 1,
-//            currentPage = 30,
-//            isDeleted = false,
-//            bookId = 1
-//        )
-//    )
-//
-//    BookShelfTheme {
-//        ReadingDetail(mockData)
-//    }
+    DetailScreen(rememberNavController(), 1)
 }

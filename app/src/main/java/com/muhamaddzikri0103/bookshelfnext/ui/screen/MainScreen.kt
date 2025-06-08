@@ -51,7 +51,7 @@ import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 import com.muhamaddzikri0103.bookshelfnext.util.SettingsDataStore
-import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
+//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -121,54 +121,56 @@ fun MainScreen(navController: NavHostController) {
 
 @Composable
 fun ScreenContent(showList: Boolean, navController: NavHostController, modifier: Modifier = Modifier) {
+    val viewModel: MainViewModel = viewModel()
+
     val context = LocalContext.current
-    val factory = ViewModelFactory(context)
-    val viewModel: MainViewModel = viewModel(factory = factory)
-    val data by viewModel.data.collectAsState()
+//    val factory = ViewModelFactory(context)
+//    val viewModel: MainViewModel = viewModel(factory = factory)
+//    val data by viewModel.data.collectAsState()
 //    val data = emptyList<BookAndReading>()
 
-    if (data.isEmpty()) {
-        Column(
-            modifier = modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.empty_list),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-    else {
-        if (showList) {
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 84.dp)
-            ) {
-                items(data) {
-                    ListItem(bookNreading = it) {
-                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
-                    }
-                    HorizontalDivider()
-                }
-            }
-        } else {
-            LazyVerticalStaggeredGrid(
-                modifier = modifier.fillMaxSize(),
-                columns = StaggeredGridCells.Fixed(2),
-                verticalItemSpacing = 8.dp,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
-            ) {
-                items(data) {
-                    GridItem(bookNreading = it) {
-                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
-                    }
-                }
-            }
-        }
-
-    }
+//    if (data.isEmpty()) {
+//        Column(
+//            modifier = modifier.fillMaxSize().padding(16.dp),
+//            verticalArrangement = Arrangement.Center,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                text = stringResource(R.string.empty_list),
+//                textAlign = TextAlign.Center
+//            )
+//        }
+//    }
+//    else {
+//        if (showList) {
+//            LazyColumn(
+//                modifier = modifier.fillMaxSize(),
+//                contentPadding = PaddingValues(bottom = 84.dp)
+//            ) {
+//                items(data) {
+//                    ListItem(bookNreading = it) {
+//                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
+//                    }
+//                    HorizontalDivider()
+//                }
+//            }
+//        } else {
+//            LazyVerticalStaggeredGrid(
+//                modifier = modifier.fillMaxSize(),
+//                columns = StaggeredGridCells.Fixed(2),
+//                verticalItemSpacing = 8.dp,
+//                horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
+//            ) {
+//                items(data) {
+//                    GridItem(bookNreading = it) {
+//                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
+//                    }
+//                }
+//            }
+//        }
+//
+//    }
 }
 
 @Composable

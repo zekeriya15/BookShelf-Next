@@ -45,136 +45,136 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
-import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
+//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpsertScreen(navController: NavHostController, id: Long? = null) {
     val context = LocalContext.current
-    val factory = ViewModelFactory(context)
-    val viewModel: UpsertViewModel = viewModel(factory = factory)
-
-    var bookId by remember { mutableLongStateOf(0) }
-    var title by remember { mutableStateOf("") }
-    var author by remember { mutableStateOf("") }
-    
-    val radioOptions = listOf(
-        stringResource(R.string.romance),
-        stringResource(R.string.mystery),
-        stringResource(R.string.horror),
-        stringResource(R.string.fantasy),
-        stringResource(R.string.scifi),
-        "",
-        stringResource(R.string.biography),
-        stringResource(R.string.self_help),
-        stringResource(R.string.psychology),
-        stringResource(R.string.history),
-        stringResource(R.string.education),
-    )
-
-    var genre by remember { mutableStateOf(radioOptions[0]) }
-    var pages by remember { mutableStateOf("") }
-    var currPages by remember { mutableStateOf("") }
-    var dateModified by remember { mutableStateOf("") }
-
-    LaunchedEffect(id) {
-        if (id == null) return@LaunchedEffect
-        viewModel.getBookAndReadingById(id).collectLatest { bookAndReading ->
-            bookId = bookAndReading.bookId
-            title = bookAndReading.title
-            author = bookAndReading.author
-            genre = bookAndReading.genre
-            pages = bookAndReading.numOfPages.toString()
-            currPages = bookAndReading.currentPage.toString()
-            dateModified = bookAndReading.dateModified
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                title = {
-                    if (id == null)
-                        Text(text = stringResource(id = R.string.add_book))
-                    else
-                        Text(text = stringResource(id = R.string.edit_book))
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                actions = {
-                    IconButton(onClick = {
-                        val curr = currPages.toIntOrNull() ?: 0
-                        val total = pages.toIntOrNull() ?: 0
-
-                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
-                            && id == null
-                        ) {
-                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
-                            return@IconButton
-                        }
-                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
-                            && id != null
-                        ) {
-                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
-                            return@IconButton
-                        }
-                        if ((curr > total) && id != null) {
-                            Toast.makeText(context, R.string.invalid_pages, Toast.LENGTH_SHORT).show()
-                            return@IconButton
-                        }
-                        if (id == null) {
-                            viewModel.insert(title, author, genre, pages)
-                        } else {
-                            viewModel.update(
-                                bookId = bookId,
-                                title = title,
-                                author = author,
-                                genre = genre,
-                                numOfPages = pages,
-                                readingId = id,
-                                currentPage = currPages
-                            )
-                        }
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Check,
-                            contentDescription = stringResource(R.string.save),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        BookForm(
-            id = id,
-            title = title,
-            onTitleChange = { title = it },
-            author = author,
-            onAuthorChange = { author = it },
-            genre = genre,
-            onGenreChange = { genre = it },
-            pages = pages,
-            onPagesChange = { pages = it },
-            currPages = currPages,
-            onCurrPagesChange = { currPages = it },
-            radioOptions = radioOptions,
-            modifier = Modifier.padding(padding)
-        )
-    }
+//    val factory = ViewModelFactory(context)
+//    val viewModel: UpsertViewModel = viewModel(factory = factory)
+//
+//    var bookId by remember { mutableLongStateOf(0) }
+//    var title by remember { mutableStateOf("") }
+//    var author by remember { mutableStateOf("") }
+//
+//    val radioOptions = listOf(
+//        stringResource(R.string.romance),
+//        stringResource(R.string.mystery),
+//        stringResource(R.string.horror),
+//        stringResource(R.string.fantasy),
+//        stringResource(R.string.scifi),
+//        "",
+//        stringResource(R.string.biography),
+//        stringResource(R.string.self_help),
+//        stringResource(R.string.psychology),
+//        stringResource(R.string.history),
+//        stringResource(R.string.education),
+//    )
+//
+//    var genre by remember { mutableStateOf(radioOptions[0]) }
+//    var pages by remember { mutableStateOf("") }
+//    var currPages by remember { mutableStateOf("") }
+//    var dateModified by remember { mutableStateOf("") }
+//
+//    LaunchedEffect(id) {
+//        if (id == null) return@LaunchedEffect
+//        viewModel.getBookAndReadingById(id).collectLatest { bookAndReading ->
+//            bookId = bookAndReading.bookId
+//            title = bookAndReading.title
+//            author = bookAndReading.author
+//            genre = bookAndReading.genre
+//            pages = bookAndReading.numOfPages.toString()
+//            currPages = bookAndReading.currentPage.toString()
+//            dateModified = bookAndReading.dateModified
+//        }
+//    }
+////
+////    Scaffold(
+////        topBar = {
+////            TopAppBar(
+////                navigationIcon = {
+////                    IconButton(onClick = { navController.popBackStack() }) {
+////                        Icon(
+////                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+////                            contentDescription = stringResource(R.string.back),
+////                            tint = MaterialTheme.colorScheme.primary
+////                        )
+////                    }
+////                },
+////                title = {
+////                    if (id == null)
+////                        Text(text = stringResource(id = R.string.add_book))
+////                    else
+////                        Text(text = stringResource(id = R.string.edit_book))
+////                },
+////                colors = TopAppBarDefaults.mediumTopAppBarColors(
+////                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+////                    titleContentColor = MaterialTheme.colorScheme.primary
+////                ),
+////                actions = {
+////                    IconButton(onClick = {
+////                        val curr = currPages.toIntOrNull() ?: 0
+////                        val total = pages.toIntOrNull() ?: 0
+////
+////                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
+////                            && id == null
+////                        ) {
+////                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
+////                            return@IconButton
+////                        }
+////                        if ((title == "" || author == "" || genre == "" || pages == "" || pages == "0")
+////                            && id != null
+////                        ) {
+////                            Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
+////                            return@IconButton
+////                        }
+////                        if ((curr > total) && id != null) {
+////                            Toast.makeText(context, R.string.invalid_pages, Toast.LENGTH_SHORT).show()
+////                            return@IconButton
+////                        }
+////                        if (id == null) {
+////                            viewModel.insert(title, author, genre, pages)
+////                        } else {
+////                            viewModel.update(
+////                                bookId = bookId,
+////                                title = title,
+////                                author = author,
+////                                genre = genre,
+////                                numOfPages = pages,
+////                                readingId = id,
+////                                currentPage = currPages
+////                            )
+////                        }
+////                        navController.popBackStack()
+////                    }) {
+////                        Icon(
+////                            imageVector = Icons.Outlined.Check,
+////                            contentDescription = stringResource(R.string.save),
+////                            tint = MaterialTheme.colorScheme.primary
+////                        )
+////                    }
+////                }
+////            )
+////        }
+//    ) { padding ->
+//        BookForm(
+//            id = id,
+//            title = title,
+//            onTitleChange = { title = it },
+//            author = author,
+//            onAuthorChange = { author = it },
+//            genre = genre,
+//            onGenreChange = { genre = it },
+//            pages = pages,
+//            onPagesChange = { pages = it },
+//            currPages = currPages,
+//            onCurrPagesChange = { currPages = it },
+//            radioOptions = radioOptions,
+//            modifier = Modifier.padding(padding)
+//        )
+//    }
 }
 
 @Composable

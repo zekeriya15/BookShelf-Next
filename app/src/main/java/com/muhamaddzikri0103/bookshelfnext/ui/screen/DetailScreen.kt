@@ -51,7 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
-import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
+//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,47 +65,47 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 @Composable
 fun DetailScreen(navController: NavHostController, id: Long) {
     val context = LocalContext.current
-    val factory = ViewModelFactory(context)
-    val viewModel: UpsertViewModel = viewModel(factory = factory)
-
-    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
-    if (data == null) return
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                title = {
-                    Text(
-                        text = stringResource(R.string.reading_detail),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                actions = {
-                    UpdateNDelete(navController, id) {
-                        viewModel.softDelete(id)
-                        navController.popBackStack()
-                        Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
-    }
+//    val factory = ViewModelFactory(context)
+//    val viewModel: UpsertViewModel = viewModel(factory = factory)
+//
+//    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
+//    if (data == null) return
+//
+//    Scaffold(
+//        topBar = {
+//            TopAppBar(
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.popBackStack() }) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = stringResource(R.string.back),
+//                            tint = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//                },
+//                title = {
+//                    Text(
+//                        text = stringResource(R.string.reading_detail),
+//                        maxLines = 1,
+//                        overflow = TextOverflow.Ellipsis
+//                    )
+//                },
+//                colors = TopAppBarDefaults.mediumTopAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+//                    titleContentColor = MaterialTheme.colorScheme.primary
+//                ),
+//                actions = {
+//                    UpdateNDelete(navController, id) {
+//                        viewModel.softDelete(id)
+//                        navController.popBackStack()
+//                        Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            )
+//        }
+//    ) { innerPadding ->
+//        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
+//    }
 }
 
 @Composable

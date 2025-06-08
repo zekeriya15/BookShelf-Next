@@ -45,58 +45,58 @@ import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
-import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
+//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(navController: NavHostController) {
     val context = LocalContext.current
-    val factory = ViewModelFactory(context)
-    val viewModel: TrashViewModel = viewModel(factory = factory)
-
-    var showDeleteAllDialog by remember { mutableStateOf(false) }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                title = {
-                    Text(text = stringResource(id = R.string.bin))
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                actions = {
-                    DeleteAllMenu(onDelete = { showDeleteAllDialog = true })
-                }
-            )
-        }
-    ) { innerPadding ->
-        TrashContent(viewModel, Modifier.padding(innerPadding))
-
-        if (showDeleteAllDialog) {
-            DisplayAlertDialog(
-                displayText = stringResource(R.string.confirm_delete_all),
-                confirmText = stringResource(R.string.delete),
-                dismissText = stringResource(R.string.cancel),
-                onDismissRequest = { showDeleteAllDialog = false },
-                onConfirmation = {
-                    viewModel.deleteAllTrash()
-                    Toast.makeText(context, R.string.toast_deleted_all, Toast.LENGTH_SHORT).show()
-                    showDeleteAllDialog = false
-                }
-            )
-        }
-    }
+//    val factory = ViewModelFactory(context)
+//    val viewModel: TrashViewModel = viewModel(factory = factory)
+//
+//    var showDeleteAllDialog by remember { mutableStateOf(false) }
+//
+//    Scaffold(
+//        topBar = {
+//            TopAppBar(
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.popBackStack() }) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = stringResource(R.string.back),
+//                            tint = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//                },
+//                title = {
+//                    Text(text = stringResource(id = R.string.bin))
+//                },
+//                colors = TopAppBarDefaults.mediumTopAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+//                    titleContentColor = MaterialTheme.colorScheme.primary
+//                ),
+//                actions = {
+//                    DeleteAllMenu(onDelete = { showDeleteAllDialog = true })
+//                }
+//            )
+//        }
+//    ) { innerPadding ->
+//        TrashContent(viewModel, Modifier.padding(innerPadding))
+//
+//        if (showDeleteAllDialog) {
+//            DisplayAlertDialog(
+//                displayText = stringResource(R.string.confirm_delete_all),
+//                confirmText = stringResource(R.string.delete),
+//                dismissText = stringResource(R.string.cancel),
+//                onDismissRequest = { showDeleteAllDialog = false },
+//                onConfirmation = {
+//                    viewModel.deleteAllTrash()
+//                    Toast.makeText(context, R.string.toast_deleted_all, Toast.LENGTH_SHORT).show()
+//                    showDeleteAllDialog = false
+//                }
+//            )
+//        }
+//    }
 }
 
 @Composable

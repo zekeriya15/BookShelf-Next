@@ -166,7 +166,8 @@ fun ScreenContent(showList: Boolean, navController: NavHostController, modifier:
             ) {
                 items(data) {
                     ListItem(reading = it) {
-//                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
+                        navController.navigate(Screen.DetailScreen.withId(it.id))
+
                     }
                     HorizontalDivider()
                 }
@@ -200,7 +201,7 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
     val pctFormat = String.format(Locale.US, "%.0f", pct)
 
-//    cek device bisa akses http dari ngrok
+//    cek device bisa akses http dari ngrok or not
     LaunchedEffect(imageUrl) {
         if (imageUrl != null) {
             withContext(Dispatchers.IO) {
@@ -225,6 +226,7 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
             }
         }
     }
+
 
     Row(
         modifier = Modifier.fillMaxWidth()

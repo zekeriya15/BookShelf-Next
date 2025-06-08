@@ -28,10 +28,10 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
        composable(
            route = Screen.DetailScreen.route,
            arguments = listOf(
-               navArgument(READING_DETAIL_KEY_ID) { type = NavType.LongType }
+               navArgument(READING_DETAIL_KEY_ID) { type = NavType.IntType }
            )
        ) { navBackStackEntry ->
-           val id = navBackStackEntry.arguments?.getLong(READING_DETAIL_KEY_ID) ?: return@composable
+           val id = navBackStackEntry.arguments?.getInt(READING_DETAIL_KEY_ID) ?: return@composable
            DetailScreen(navController, id)
        }
        composable(

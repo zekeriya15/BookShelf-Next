@@ -8,6 +8,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 //import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 
 private const val BASE_URL = "https://37c6-36-69-203-148.ngrok-free.app/"
 
@@ -21,10 +22,16 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 interface BookshelfApiService {
-    @GET("/readings")
+    @GET("readings")
     suspend fun getReadings(
         @Header("Authorization") userId: String
     ): List<Reading>
+
+    @GET("readings/{id}")
+    suspend fun getReadingById(
+        @Path("id") readingId: String,
+        @Header("Authorization") userId: String
+    ): Reading
 }
 
 object ReadingsApi {

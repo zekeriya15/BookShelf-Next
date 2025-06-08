@@ -1,7 +1,6 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +49,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
+import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 //import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import java.text.SimpleDateFormat
@@ -63,37 +63,45 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavHostController, id: Long) {
-    val context = LocalContext.current
+fun DetailScreen(navController: NavHostController, id: Int) {
+//    val context = LocalContext.current
 //    val factory = ViewModelFactory(context)
 //    val viewModel: UpsertViewModel = viewModel(factory = factory)
-//
+
+    val viewModel: UpsertViewModel = viewModel()
+
+    LaunchedEffect(id) {
+        viewModel.retrieveDataById(id)
+    }
+
+    val data by viewModel.currentReading.collectAsState()
+
 //    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
-//    if (data == null) return
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                navigationIcon = {
-//                    IconButton(onClick = { navController.popBackStack() }) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                            contentDescription = stringResource(R.string.back),
-//                            tint = MaterialTheme.colorScheme.primary
-//                        )
-//                    }
-//                },
-//                title = {
-//                    Text(
-//                        text = stringResource(R.string.reading_detail),
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis
-//                    )
-//                },
-//                colors = TopAppBarDefaults.mediumTopAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                    titleContentColor = MaterialTheme.colorScheme.primary
-//                ),
+    if (data == null) return
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.reading_detail),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                ),
 //                actions = {
 //                    UpdateNDelete(navController, id) {
 //                        viewModel.softDelete(id)
@@ -101,11 +109,11 @@ fun DetailScreen(navController: NavHostController, id: Long) {
 //                        Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
 //                    }
 //                }
-//            )
-//        }
-//    ) { innerPadding ->
-//        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
-//    }
+            )
+        }
+    ) { innerPadding ->
+        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
+    }
 }
 
 @Composable
@@ -146,11 +154,11 @@ fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () ->
 }
 
 @Composable
-fun ReadingDetail(data: BookAndReading, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
+fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
     val title = data.title
     val author = data.author
     val genre = data.genre
-    val numOfPages = data.numOfPages
+    val numOfPages = data.pages
     var dateModified by remember { mutableStateOf(data.dateModified) }
     var currentPage by remember { mutableIntStateOf(data.currentPage) }
 
@@ -214,11 +222,11 @@ fun ReadingDetail(data: BookAndReading, viewModel: UpsertViewModel, modifier: Mo
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Start
             )
-            ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
-                currentPage = it
-            }, onDateModifiedUpdate = {
-                dateModified = it
-            })
+//            ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
+//                currentPage = it
+//            }, onDateModifiedUpdate = {
+//                dateModified = it
+//            })
         }
     }
 }
@@ -309,16 +317,16 @@ fun ButtonNCounter(
                         amount = 0
                         val formattedNow = formatter.format(Date())
 
-                        viewModel.update(
-                            bookId = data.bookId,
-                            title = data.title,
-                            author = data.author,
-                            genre = data.genre,
-                            numOfPages = data.numOfPages.toString(),
-                            readingId = data.readingId,
-                            currentPage = totalPagesRead.toString(),
-                            dateModified = formattedNow
-                        )
+//                        viewModel.update(
+//                            bookId = data.bookId,
+//                            title = data.title,
+//                            author = data.author,
+//                            genre = data.genre,
+//                            numOfPages = data.numOfPages.toString(),
+//                            readingId = data.readingId,
+//                            currentPage = totalPagesRead.toString(),
+//                            dateModified = formattedNow
+//                        )
 
                         currentPage = totalPagesRead
                         onProgressUpdate(totalPagesRead)

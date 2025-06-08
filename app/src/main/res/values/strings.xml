@@ -46,6 +46,10 @@
     <string name="grid">Grid view</string>
 
 
+    <string name="image">Image of %1$s book</string>
+
+
+
     <string name="romance">Romance</string>
     <string name="mystery">Mystery/Thriller</string>
     <string name="horror">Horror</string>

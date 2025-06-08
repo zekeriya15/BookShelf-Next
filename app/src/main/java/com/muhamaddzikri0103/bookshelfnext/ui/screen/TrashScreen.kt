@@ -102,55 +102,55 @@ fun TrashScreen(navController: NavHostController) {
 @Composable
 fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val data by viewModel.data.collectAsState()
+//    val data by viewModel.data.collectAsState()
 //    val data = emptyList<BookAndReading>()
 
     var showDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<BookAndReading?>(null) }
 
 
-    if (data.isEmpty()) {
-        Column(
-            modifier = modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.nodata_bin),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-    else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 84.dp)
-        ) {
-            items(data) { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        ListItem(bookNreading = item) {}
-                    }
-                    TrashItemMenu(
-                        onRestore = {
-                            viewModel.restore(item.readingId)
-                            Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
-                        },
-                        onDelete = {
-                            itemToDelete = item
-                            showDialog = true
-                        }
-                    )
-                }
-                HorizontalDivider()
-            }
-        }
-    }
+//    if (data.isEmpty()) {
+//        Column(
+//            modifier = modifier.fillMaxSize().padding(16.dp),
+//            verticalArrangement = Arrangement.Center,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                text = stringResource(R.string.nodata_bin),
+//                textAlign = TextAlign.Center
+//            )
+//        }
+//    }
+//    else {
+//        LazyColumn(
+//            modifier = modifier.fillMaxSize(),
+//            contentPadding = PaddingValues(bottom = 84.dp)
+//        ) {
+//            items(data) { item ->
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Box(modifier = Modifier.weight(1f)) {
+//                        ListItem(reading = item) {}
+//                    }
+//                    TrashItemMenu(
+//                        onRestore = {
+//                            viewModel.restore(item.readingId)
+//                            Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
+//                        },
+//                        onDelete = {
+//                            itemToDelete = item
+//                            showDialog = true
+//                        }
+//                    )
+//                }
+//                HorizontalDivider()
+//            }
+//        }
+//    }
 
     if (showDialog && itemToDelete != null) {
         DisplayAlertDialog(

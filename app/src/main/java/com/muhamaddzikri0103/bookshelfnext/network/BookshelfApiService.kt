@@ -9,7 +9,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 
-private const val BASE_URL = "https://1ee4-36-69-203-148.ngrok-free.app/"
+private const val BASE_URL = "https://37c6-36-69-203-148.ngrok-free.app/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())

@@ -1,19 +1,25 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -31,10 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,8 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
+import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 import com.muhamaddzikri0103.bookshelfnext.util.SettingsDataStore
@@ -55,6 +67,9 @@ import com.muhamaddzikri0103.bookshelfnext.util.SettingsDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,39 +137,42 @@ fun MainScreen(navController: NavHostController) {
 @Composable
 fun ScreenContent(showList: Boolean, navController: NavHostController, modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
+    val data by viewModel.data
 
-    val context = LocalContext.current
+
+//    val context = LocalContext.current
 //    val factory = ViewModelFactory(context)
 //    val viewModel: MainViewModel = viewModel(factory = factory)
 //    val data by viewModel.data.collectAsState()
 //    val data = emptyList<BookAndReading>()
 
-//    if (data.isEmpty()) {
-//        Column(
-//            modifier = modifier.fillMaxSize().padding(16.dp),
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(
-//                text = stringResource(R.string.empty_list),
-//                textAlign = TextAlign.Center
-//            )
-//        }
-//    }
-//    else {
-//        if (showList) {
-//            LazyColumn(
-//                modifier = modifier.fillMaxSize(),
-//                contentPadding = PaddingValues(bottom = 84.dp)
-//            ) {
-//                items(data) {
-//                    ListItem(bookNreading = it) {
+    if (data.isEmpty()) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.empty_list),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+    else {
+        if (showList) {
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 84.dp)
+            ) {
+                items(data) {
+                    ListItem(reading = it) {
 //                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
-//                    }
-//                    HorizontalDivider()
-//                }
-//            }
-//        } else {
+                    }
+                    HorizontalDivider()
+                }
+            }
+        }
+//        else {
 //            LazyVerticalStaggeredGrid(
 //                modifier = modifier.fillMaxSize(),
 //                columns = StaggeredGridCells.Fixed(2),
@@ -169,41 +187,98 @@ fun ScreenContent(showList: Boolean, navController: NavHostController, modifier:
 //                }
 //            }
 //        }
-//
-//    }
+
+    }
 }
 
 @Composable
-fun ListItem(bookNreading: BookAndReading, onClick: () -> Unit) {
-    val numOfPages: Int = bookNreading.numOfPages
-    val currentPage: Int = bookNreading.currentPage
+fun ListItem(reading: Reading, onClick: () -> Unit) {
+    val imageUrl: String? = reading.imageUrl
+    val numOfPages: Int = reading.pages
+    val currentPage: Int = reading.currentPage
     val pagesLeft: Int = numOfPages - currentPage
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
     val pctFormat = String.format(Locale.US, "%.0f", pct)
 
-    Column(
+//    cek device bisa akses http dari ngrok
+    LaunchedEffect(imageUrl) {
+        if (imageUrl != null) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val client = OkHttpClient()
+                    val request = Request.Builder()
+                        .url(imageUrl)
+                        .build()
+
+                    client.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            Log.d("ImageTest", "Image loaded successfully: ${response.code}")
+                        } else {
+                            Log.e("ImageTest", "Image load failed: ${response.code} - ${response.message}")
+                            // Log the response body if it's an error
+                            Log.e("ImageTest", "Response Body: ${response.body?.string()}")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("ImageTest", "Image network error: ${e.message}", e)
+                }
+            }
+        }
+    }
+
+    Row(
         modifier = Modifier.fillMaxWidth()
             .padding(16.dp)
             .clickable { onClick() },
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.Start
     ) {
-        Text(
-            text = bookNreading.title,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = bookNreading.author,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
-        Text(
-            text = stringResource(R.string.x_completed, pctFormat),
-            fontWeight = FontWeight.SemiBold
-        )
+        var columnPadding = 0
+
+        if (imageUrl != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = stringResource(R.string.image, reading.title),
+                contentScale = ContentScale.Crop,
+                error = painterResource(R.drawable.baseline_broken_image_24),
+                modifier = Modifier
+                    .width(90.dp).aspectRatio(2f / 3f)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+
+            columnPadding = 16
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = columnPadding.dp),
+//            .clickable { onClick() },
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            Text(
+                text = reading.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = reading.author,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
+            Text(
+                text = stringResource(R.string.x_completed, pctFormat),
+                fontWeight = FontWeight.SemiBold
+            )
+        }
     }
+
+
+
 }
 
 @Composable

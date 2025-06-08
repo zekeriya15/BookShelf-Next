@@ -7,7 +7,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.muhamaddzikri0103.bookshelfnext.model.Book
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
-import com.muhamaddzikri0103.bookshelfnext.model.Reading
+import com.muhamaddzikri0103.bookshelfnext.model.ReadingOld
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,16 +17,16 @@ interface BookshelfDao {
     suspend fun insertBook(book: Book): Long
 
     @Insert
-    suspend fun insertReading(reading: Reading)
+    suspend fun insertReading(reading: ReadingOld)
 
     @Update
     suspend fun updateBook(book: Book)
 
     @Update
-    suspend fun updateReading(reading: Reading)
+    suspend fun updateReading(reading: ReadingOld)
 
     @Transaction
-    suspend fun insertBookAndReading(book: Book, reading: Reading) {
+    suspend fun insertBookAndReading(book: Book, reading: ReadingOld) {
         val bookId = insertBook(book)
 
         val readingWithBookId = reading.copy(bookId = bookId)
@@ -35,7 +35,7 @@ interface BookshelfDao {
     }
 
     @Transaction
-    suspend fun updateBookAndReading(book: Book, reading: Reading) {
+    suspend fun updateBookAndReading(book: Book, reading: ReadingOld) {
         updateBook(book)
         updateReading(reading)
     }

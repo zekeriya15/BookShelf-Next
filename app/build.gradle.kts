@@ -58,7 +58,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.retrofit)
-    implementation(libs.converter.scalars)
+//    implementation(libs.converter.scalars)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
 
 
     testImplementation(libs.junit)

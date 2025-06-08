@@ -5,9 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.muhamaddzikri0103.bookshelfnext.model.Book
-import com.muhamaddzikri0103.bookshelfnext.model.Reading
+import com.muhamaddzikri0103.bookshelfnext.model.ReadingOld
 
-@Database(entities = [Book::class, Reading::class], version = 1, exportSchema = false)
+@Database(entities = [Book::class, ReadingOld::class], version = 1, exportSchema = false)
 abstract class BookshelfDb : RoomDatabase() {
 
     abstract val dao: BookshelfDao

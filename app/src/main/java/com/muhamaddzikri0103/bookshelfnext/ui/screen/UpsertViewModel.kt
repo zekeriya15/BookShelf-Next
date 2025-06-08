@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.muhamaddzikri0103.bookshelfnext.database.BookshelfDao
 import com.muhamaddzikri0103.bookshelfnext.model.Book
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
-import com.muhamaddzikri0103.bookshelfnext.model.Reading
+import com.muhamaddzikri0103.bookshelfnext.model.ReadingOld
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -29,7 +29,7 @@ class UpsertViewModel(private val dao: BookshelfDao) : ViewModel() {
             genre = genre,
             numOfPages = numOfPages.toInt()
         )
-        val reading = Reading(
+        val reading = ReadingOld(
             dateModified = formatter.format(Date())
         )
         viewModelScope.launch(Dispatchers.IO) {
@@ -58,7 +58,7 @@ class UpsertViewModel(private val dao: BookshelfDao) : ViewModel() {
             genre = genre,
             numOfPages = numOfPages.toInt()
         )
-        val reading = Reading(
+        val reading = ReadingOld(
             id = readingId,
             bookId = bookId,
             currentPage = currentPage.toIntOrNull() ?: 0,

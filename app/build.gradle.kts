@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.muhamaddzikri0103.bookshelf"
+    namespace = "com.muhamaddzikri0103.bookshelfnext"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.muhamaddzikri0103.bookshelf"
+        applicationId = "com.muhamaddzikri0103.bookshelfnext"
         minSdk = 23
         targetSdk = 35
         versionCode = 1

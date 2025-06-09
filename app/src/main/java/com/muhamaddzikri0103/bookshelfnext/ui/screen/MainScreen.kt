@@ -263,7 +263,8 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth()
             .padding(16.dp)
             .clickable { onClick() },
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         var columnPadding = 0
 
@@ -275,10 +276,10 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
                     .build(),
                 contentDescription = stringResource(R.string.image, reading.title),
                 contentScale = ContentScale.Crop,
-                error = painterResource(R.drawable.baseline_broken_image_24),
                 placeholder = painterResource(R.drawable.loading_img),
-                modifier = Modifier
-                    .width(90.dp).aspectRatio(2f / 3f)
+                error = painterResource(R.drawable.baseline_broken_image_24),
+                modifier = Modifier.width(80.dp)
+                    .aspectRatio(2f / 3f)
                     .clip(RoundedCornerShape(10.dp))
             )
 

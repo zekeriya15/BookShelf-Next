@@ -1,17 +1,20 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
@@ -63,8 +71,9 @@ import java.util.Locale
 
 const val READING_DETAIL_KEY_ID = "readingDetailId"
 
-private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+private val inputFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.US)
 private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,8 +87,6 @@ fun DetailScreen(navController: NavHostController, id: Int) {
 
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
-
-//    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
 
     Scaffold(
         topBar = {
@@ -115,52 +122,49 @@ fun DetailScreen(navController: NavHostController, id: Int) {
         }
     ) { innerPadding ->
 
-        Box(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()
-        ) {
-            when (status) {
+        when (status) {
 
-                ApiStatus.LOADING -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .wrapContentSize(Alignment.Center)
+            ApiStatus.LOADING -> {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            ApiStatus.FAILED -> {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.error),
+                        textAlign = TextAlign.Center
                     )
-                }
-
-                ApiStatus.FAILED -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Button(
+                        onClick = { viewModel.retrieveDataById(id) },
+                        modifier = Modifier.padding(top = 16.dp),
+                        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.error),
-                            textAlign = TextAlign.Center
-                        )
-                        Button(
-                            onClick = { viewModel.retrieveDataById(id) },
-                            modifier = Modifier.padding(top = 16.dp),
-                            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-                        ) {
-                            Text(text = stringResource(R.string.try_again))
-                        }
+                        Text(text = stringResource(R.string.try_again))
                     }
                 }
+            }
 
-                ApiStatus.SUCCESS -> {
-                    if (data != null) {
-                        ReadingDetail(
-                            data = data!!,
-                            viewModel = viewModel,
-                            modifier = Modifier.fillMaxSize())
-                    } else {
-                        Text(
-                            text = stringResource(R.string.empty_list),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+            ApiStatus.SUCCESS -> {
+                if (data != null) {
+                    ReadingDetail(
+                        data = data!!,
+                        viewModel = viewModel,
+                        modifier = Modifier.fillMaxSize())
+                } else {
+                    Text(
+                        text = stringResource(R.string.empty_list),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -206,6 +210,7 @@ fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () ->
 
 @Composable
 fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
+    val imageUrl: String? = data.imageUrl
     val title = data.title
     val author = data.author
     val genre = data.genre
@@ -227,8 +232,28 @@ fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier 
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (imageUrl != null) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 60.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = stringResource(R.string.image, title),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.loading_img),
+                        error = painterResource(R.drawable.baseline_broken_image_24),
+                        modifier = Modifier.size(180.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                }
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
@@ -263,9 +288,16 @@ fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier 
             )
 
             val formattedDate = try {
-                val parsedDate = formatter.parse(dateModified)
-                outputFormatter.format(parsedDate!!)
+                val parsedDate: Date? = inputFormatter.parse(dateModified)
+
+                if (parsedDate != null) {
+                    outputFormatter.format(parsedDate)
+                } else {
+                    Log.e("ReadingDetail", "Parsed date is null for: $dateModified - check input format.")
+                    dateModified
+                }
             } catch (e: Exception) {
+                Log.e("ReadingDetail", "Error parsing date: $dateModified", e)
                 dateModified
             }
             Text(
@@ -363,25 +395,25 @@ fun ButtonNCounter(
             ) {
                 IconButton(
                     onClick = {
-                        isClicked = false
-                        totalPagesRead = currentPage + amount
-                        amount = 0
-                        val formattedNow = formatter.format(Date())
-
-//                        viewModel.update(
-//                            bookId = data.bookId,
-//                            title = data.title,
-//                            author = data.author,
-//                            genre = data.genre,
-//                            numOfPages = data.numOfPages.toString(),
-//                            readingId = data.readingId,
-//                            currentPage = totalPagesRead.toString(),
-//                            dateModified = formattedNow
-//                        )
-
-                        currentPage = totalPagesRead
-                        onProgressUpdate(totalPagesRead)
-                        onDateModifiedUpdate(formattedNow)
+//                        isClicked = false
+//                        totalPagesRead = currentPage + amount
+//                        amount = 0
+////                        val formattedNow = formatter.format(Date())
+//
+////                        viewModel.update(
+////                            bookId = data.bookId,
+////                            title = data.title,
+////                            author = data.author,
+////                            genre = data.genre,
+////                            numOfPages = data.numOfPages.toString(),
+////                            readingId = data.readingId,
+////                            currentPage = totalPagesRead.toString(),
+////                            dateModified = formattedNow
+////                        )
+//
+//                        currentPage = totalPagesRead
+//                        onProgressUpdate(totalPagesRead)
+//                        onDateModifiedUpdate(formattedNow)
                     },
                     modifier = Modifier
                         .size(56.dp)

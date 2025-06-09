@@ -14,13 +14,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -73,10 +69,11 @@ import com.muhamaddzikri0103.bookshelfnext.BuildConfig
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
+import com.muhamaddzikri0103.bookshelfnext.model.User
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
-import com.muhamaddzikri0103.bookshelfnext.util.SettingsDataStore
+import com.muhamaddzikri0103.bookshelfnext.network.SettingsDataStore
 //import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,7 +88,9 @@ import java.util.Locale
 fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current
 
-    val dataStore = SettingsDataStore(LocalContext.current)
+    val dataStore = SettingsDataStore(context)
+    val user by dataStore.userFlow.collectAsState(User())
+
     val showList by dataStore.layoutFlow.collectAsState(true)
 
     Scaffold(
@@ -130,7 +129,12 @@ fun MainScreen(navController: NavHostController) {
                         )
                     }
                     IconButton(onClick = {
-                        CoroutineScope(Dispatchers.IO).launch { signIn(context) }
+                        if (user.email.isEmpty()) {
+                            CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
+                        }
+                        else {
+                            Log.d("SIGN-IN", "User: $user")
+                        }
                     }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_account_circle_24),
@@ -373,7 +377,7 @@ fun GridItem(bookNreading: BookAndReading, onClick: () -> Unit) {
     }
 }
 
-private suspend fun signIn(context: Context) {
+private suspend fun signIn(context: Context, dataStore: SettingsDataStore) {
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(false)
         .setServerClientId(BuildConfig.API_KEY)
@@ -386,18 +390,25 @@ private suspend fun signIn(context: Context) {
     try {
         val credentialManager = CredentialManager.create(context)
         val result = credentialManager.getCredential(context, request)
-        handleSignIn(result)
+        handleSignIn(result, dataStore)
     } catch (e: GetCredentialException) {
         Log.e("SIGN-IN", "Error ${e.errorMessage}")
     }
 }
 
-private fun handleSignIn(result: GetCredentialResponse) {
+private suspend fun handleSignIn(
+    result: GetCredentialResponse,
+    dataStore: SettingsDataStore
+) {
     val credential = result.credential
     if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         try {
             val googleId = GoogleIdTokenCredential.createFrom(credential.data)
-            Log.d("SIGN-IN", "User email: ${googleId.id}")
+//            Log.d("SIGN-IN", "User email: ${googleId.id}")
+            val name = googleId.displayName ?: ""
+            val email = googleId.id
+            val photoUrl = googleId.profilePictureUri.toString()
+            dataStore.saveData(User(name, email, photoUrl))
         } catch (e: GoogleIdTokenParsingException) {
             Log.e("SIGN-IN", "Error ${e.message}")
         }

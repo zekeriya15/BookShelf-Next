@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,8 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -61,6 +64,7 @@ import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
+import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 import com.muhamaddzikri0103.bookshelfnext.util.SettingsDataStore
 //import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
@@ -138,57 +142,85 @@ fun MainScreen(navController: NavHostController) {
 fun ScreenContent(showList: Boolean, navController: NavHostController, modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
     val data by viewModel.data
+    val status by viewModel.status.collectAsState()
 
-
-//    val context = LocalContext.current
-//    val factory = ViewModelFactory(context)
-//    val viewModel: MainViewModel = viewModel(factory = factory)
-//    val data by viewModel.data.collectAsState()
-//    val data = emptyList<BookAndReading>()
-
-    if (data.isEmpty()) {
-        Column(
-            modifier = modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.empty_list),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-    else {
-        if (showList) {
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 84.dp)
+    when (status) {
+        ApiStatus.LOADING -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                items(data) {
-                    ListItem(reading = it) {
-                        navController.navigate(Screen.DetailScreen.withId(it.id))
+                CircularProgressIndicator()
+            }
+        }
 
+        ApiStatus.SUCCESS -> {
+            if (data.isEmpty()) {
+                Column(
+                    modifier = modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.empty_list),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            else {
+                if (showList) {
+                    LazyColumn(
+                        modifier = modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 84.dp)
+                    ) {
+                        items(data) {
+                            ListItem(reading = it) {
+                                navController.navigate(Screen.DetailScreen.withId(it.id))
+                            }
+                            HorizontalDivider()
+                        }
                     }
-                    HorizontalDivider()
+                }
+//                else {
+//                    LazyVerticalStaggeredGrid(
+//                        modifier = modifier.fillMaxSize(),
+//                        columns = StaggeredGridCells.Fixed(2),
+//                        verticalItemSpacing = 8.dp,
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                        contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
+//                    ) {
+//                        items(data) {
+//                            GridItem(bookNreading = it) {
+//                                navController.navigate(Screen.DetailScreen.withId(it.readingId))
+//                            }
+//                        }
+//                    }
+//                }
+            }
+        }
+
+        ApiStatus.FAILED -> {
+            Column(
+                modifier = modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.error),
+                    textAlign = TextAlign.Center
+                )
+                Button(
+                    onClick = { viewModel.retrieveData() },
+                    modifier = Modifier.padding(top = 16.dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.try_again),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
-//        else {
-//            LazyVerticalStaggeredGrid(
-//                modifier = modifier.fillMaxSize(),
-//                columns = StaggeredGridCells.Fixed(2),
-//                verticalItemSpacing = 8.dp,
-//                horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
-//            ) {
-//                items(data) {
-//                    GridItem(bookNreading = it) {
-//                        navController.navigate(Screen.DetailScreen.withId(it.readingId))
-//                    }
-//                }
-//            }
-//        }
-
     }
 }
 
@@ -227,7 +259,6 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
         }
     }
 
-
     Row(
         modifier = Modifier.fillMaxWidth()
             .padding(16.dp)
@@ -245,6 +276,7 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
                 contentDescription = stringResource(R.string.image, reading.title),
                 contentScale = ContentScale.Crop,
                 error = painterResource(R.drawable.baseline_broken_image_24),
+                placeholder = painterResource(R.drawable.loading_img),
                 modifier = Modifier
                     .width(90.dp).aspectRatio(2f / 3f)
                     .clip(RoundedCornerShape(10.dp))
@@ -256,7 +288,7 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(start = columnPadding.dp),
-//            .clickable { onClick() },
+//                .clickable { onClick() },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
@@ -278,9 +310,6 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
             )
         }
     }
-
-
-
 }
 
 @Composable

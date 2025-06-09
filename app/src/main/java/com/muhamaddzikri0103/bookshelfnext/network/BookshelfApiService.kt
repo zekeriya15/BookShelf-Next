@@ -10,7 +10,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
 
-private const val BASE_URL = "https://37c6-36-69-203-148.ngrok-free.app/"
+private const val BASE_URL = "https://ebac-36-69-203-148.ngrok-free.app/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
@@ -39,3 +39,5 @@ object ReadingsApi {
         retrofit.create(BookshelfApiService::class.java)
     }
 }
+
+enum class ApiStatus { LOADING, SUCCESS, FAILED }

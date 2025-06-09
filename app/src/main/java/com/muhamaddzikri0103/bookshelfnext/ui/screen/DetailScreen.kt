@@ -2,12 +2,15 @@ package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +55,7 @@ import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
+import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 //import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -64,9 +69,6 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(navController: NavHostController, id: Int) {
-//    val context = LocalContext.current
-//    val factory = ViewModelFactory(context)
-//    val viewModel: UpsertViewModel = viewModel(factory = factory)
 
     val viewModel: UpsertViewModel = viewModel()
 
@@ -75,9 +77,9 @@ fun DetailScreen(navController: NavHostController, id: Int) {
     }
 
     val data by viewModel.currentReading.collectAsState()
+    val status by viewModel.status.collectAsState()
 
 //    val data by viewModel.getBookAndReadingById(id).collectAsState(initial = null)
-    if (data == null) return
 
     Scaffold(
         topBar = {
@@ -112,7 +114,56 @@ fun DetailScreen(navController: NavHostController, id: Int) {
             )
         }
     ) { innerPadding ->
-        ReadingDetail(data!!, viewModel, modifier = Modifier.padding(innerPadding))
+
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+        ) {
+            when (status) {
+
+                ApiStatus.LOADING -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .wrapContentSize(Alignment.Center)
+                    )
+                }
+
+                ApiStatus.FAILED -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.error),
+                            textAlign = TextAlign.Center
+                        )
+                        Button(
+                            onClick = { viewModel.retrieveDataById(id) },
+                            modifier = Modifier.padding(top = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                        ) {
+                            Text(text = stringResource(R.string.try_again))
+                        }
+                    }
+                }
+
+                ApiStatus.SUCCESS -> {
+                    if (data != null) {
+                        ReadingDetail(
+                            data = data!!,
+                            viewModel = viewModel,
+                            modifier = Modifier.fillMaxSize())
+                    } else {
+                        Text(
+                            text = stringResource(R.string.empty_list),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -222,11 +273,11 @@ fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier 
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Start
             )
-//            ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
-//                currentPage = it
-//            }, onDateModifiedUpdate = {
-//                dateModified = it
-//            })
+//                    ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
+//                        currentPage = it
+//                    }, onDateModifiedUpdate = {
+//                        dateModified = it
+//                    })
         }
     }
 }

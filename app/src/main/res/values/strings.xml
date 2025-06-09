@@ -49,6 +49,7 @@
     <string name="image">Image of %1$s book</string>
     <string name="error">Failed retrieving data.\nConnection error.</string>
     <string name="try_again">Try again</string>
+    <string name="profile">Profile</string>
 
 
 

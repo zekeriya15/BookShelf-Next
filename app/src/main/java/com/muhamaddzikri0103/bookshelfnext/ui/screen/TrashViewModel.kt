@@ -24,16 +24,12 @@ class TrashViewModel() : ViewModel() {
     var status = MutableStateFlow(ApiStatus.LOADING)
         private set
 
-    init {
-        retrieveDeletedDatas()
-    }
-
-    fun retrieveDeletedDatas() {
+    fun retrieveDeletedDatas(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
                 val result = ReadingsApi.service.getReadings(
-                    "yakup15@gmail.com",
+                    userId,
                     "true")
 //                Log.d("MainViewModel", "Success $result")
                 deletedDatas.value = result

@@ -47,8 +47,14 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
            UpsertScreen(navController, id)
 
        }
-       composable(route = Screen.TrashScreen.route) {
-           TrashScreen(navController)
+       composable(
+           route = Screen.TrashScreen.route,
+           arguments = listOf(
+               navArgument(USER_KEY_ID) { type = NavType.StringType }
+           )
+       ) { navBackStackEntry ->
+           val userId = navBackStackEntry.arguments?.getString(USER_KEY_ID) ?: return@composable
+           TrashScreen(navController, userId)
        }
    }
 }

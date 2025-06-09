@@ -129,7 +129,9 @@ fun MainScreen(navController: NavHostController) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(onClick = { navController.navigate(Screen.TrashScreen.route) }) {
+                    IconButton(
+                        onClick = { navController.navigate(Screen.TrashScreen.withId(user.email)) }
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(R.string.bin),

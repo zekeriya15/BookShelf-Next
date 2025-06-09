@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +55,9 @@ import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrashScreen(navController: NavHostController) {
+fun TrashScreen(navController: NavHostController, userId: String) {
     val viewModel: TrashViewModel = viewModel()
+
     val context = LocalContext.current
 
     var showDeleteAllDialog by remember { mutableStateOf(false) }
@@ -84,7 +87,7 @@ fun TrashScreen(navController: NavHostController) {
             )
         }
     ) { innerPadding ->
-        TrashContent(viewModel, Modifier.padding(innerPadding))
+        TrashContent(viewModel, userId, Modifier.padding(innerPadding))
 
 //        when (status) {
 //            ApiStatus.LOADING -> {
@@ -143,11 +146,15 @@ fun TrashScreen(navController: NavHostController) {
 }
 
 @Composable
-fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
+fun TrashContent(viewModel: TrashViewModel, userId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    // Collect states from the ViewModel directly within this Composable
+
     val deletedDatas by viewModel.deletedDatas
     val status by viewModel.status.collectAsState()
+
+    LaunchedEffect(userId) {
+        viewModel.retrieveDeletedDatas(userId)
+    }
 
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDeletePermanently by remember { mutableStateOf<Reading?>(null) }
@@ -163,10 +170,6 @@ fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
             ) {
                 CircularProgressIndicator()
             }
-        }
-
-        ApiStatus.FAILED -> {
-
         }
 
         ApiStatus.SUCCESS -> {
@@ -209,6 +212,26 @@ fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
                         }
                         HorizontalDivider()
                     }
+                }
+            }
+        }
+
+        ApiStatus.FAILED -> {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.error),
+                    textAlign = TextAlign.Center
+                )
+                Button(
+                    onClick = { viewModel.retrieveDeletedDatas(userId) },
+                    modifier = Modifier.padding(top = 16.dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                ) {
+                    Text(text = stringResource(R.string.try_again))
                 }
             }
         }
@@ -301,6 +324,6 @@ fun DeleteAllMenu(onDelete: () -> Unit) {
 @Composable
 fun TrashScreenPreview() {
     BookShelfTheme {
-        TrashScreen(rememberNavController())
+        TrashScreen(rememberNavController(), "test")
     }
 }

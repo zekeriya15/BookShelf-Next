@@ -13,5 +13,7 @@ sealed class Screen(val route: String) {
         fun withId(id: Long) = "upsertScreen/$id"
 
     }
-    data object TrashScreen: Screen("trashScreen")
+    data object TrashScreen: Screen("trashScreen/{$USER_KEY_ID}") {
+        fun withId(userId: String) = "trashScreen/$userId"
+    }
 }

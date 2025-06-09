@@ -40,6 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,6 +96,8 @@ fun MainScreen(navController: NavHostController) {
 
     val showList by dataStore.layoutFlow.collectAsState(true)
 
+    var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -133,7 +138,7 @@ fun MainScreen(navController: NavHostController) {
                             CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
                         }
                         else {
-                            Log.d("SIGN-IN", "User: $user")
+                            showDialog = true
                         }
                     }) {
                         Icon(
@@ -160,6 +165,14 @@ fun MainScreen(navController: NavHostController) {
         }
     ) { innerPadding ->
         ScreenContent(showList, navController, Modifier.padding(innerPadding))
+
+        if (showDialog) {
+            ProfilDialog(
+                user = user,
+                onDismissRequest = { showDialog = false },
+                onConfirmation = { showDialog = false }
+            )
+        }
     }
 }
 

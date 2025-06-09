@@ -50,6 +50,7 @@
     <string name="error">Failed retrieving data.\nConnection error.</string>
     <string name="try_again">Try again</string>
     <string name="profile">Profile</string>
+    <string name="close">Close</string>
 
 
 

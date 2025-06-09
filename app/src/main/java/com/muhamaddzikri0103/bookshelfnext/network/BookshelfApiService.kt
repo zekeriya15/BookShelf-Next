@@ -40,7 +40,8 @@ interface BookshelfApiService {
 
     @GET("readings/{id}")
     suspend fun getReadingById(
-        @Path("id") readingId: String,
+//        @Path("id") readingId: String,
+        @Path("id") readingId: Int,
         @Header("Authorization") userId: String
     ): Reading
 

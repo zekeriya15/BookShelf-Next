@@ -24,9 +24,6 @@ class MainViewModel() : ViewModel() {
     var status = MutableStateFlow(ApiStatus.LOADING)
         private set
 
-    init {
-        retrieveData()
-    }
 
 //    fun retrieveData() {
 //        viewModelScope.launch(Dispatchers.IO) {
@@ -43,12 +40,12 @@ class MainViewModel() : ViewModel() {
 //        }
 //    }
 
-    fun retrieveData() {
+    fun retrieveData(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
                 val result = ReadingsApi.service.getReadings(
-                    "yakup15@gmail.com",
+                    userId,
                     "false")
 //                Log.d("MainViewModel", "Success $result")
                 data.value = result

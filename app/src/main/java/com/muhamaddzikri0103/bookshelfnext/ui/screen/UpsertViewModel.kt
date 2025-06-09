@@ -27,11 +27,11 @@ class UpsertViewModel() : ViewModel() {
     private val _currentReading = MutableStateFlow<Reading?>(null)
     val currentReading: StateFlow<Reading?> = _currentReading
 
-    fun retrieveDataById(readingId: Int) {
+    fun retrieveDataById(readingId: Int, userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
-                val result = ReadingsApi.service.getReadingById(readingId = readingId.toString(),"yakup15@gmail.com")
+                val result = ReadingsApi.service.getReadingById(readingId, userId)
 //                Log.d("MainViewModel", "Success $result")
                 _currentReading.value = result
                 status.value = ApiStatus.SUCCESS

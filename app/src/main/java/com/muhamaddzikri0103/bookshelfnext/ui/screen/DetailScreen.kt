@@ -70,6 +70,7 @@ import java.util.Date
 import java.util.Locale
 
 const val READING_DETAIL_KEY_ID = "readingDetailId"
+const val USER_KEY_ID = "userId"
 
 private val inputFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.US)
 private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
@@ -77,16 +78,15 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(navController: NavHostController, id: Int) {
-
+fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
     val viewModel: UpsertViewModel = viewModel()
-
-    LaunchedEffect(id) {
-        viewModel.retrieveDataById(id)
-    }
 
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
+
+    LaunchedEffect(id) {
+        viewModel.retrieveDataById(id, userId)
+    }
 
     Scaffold(
         topBar = {
@@ -145,7 +145,7 @@ fun DetailScreen(navController: NavHostController, id: Int) {
                         textAlign = TextAlign.Center
                     )
                     Button(
-                        onClick = { viewModel.retrieveDataById(id) },
+                        onClick = { viewModel.retrieveDataById(id, userId) },
                         modifier = Modifier.padding(top = 16.dp),
                         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                     ) {
@@ -436,5 +436,5 @@ fun ButtonNCounter(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun ReadingDetailPreview() {
-    DetailScreen(rememberNavController(), 1)
+    DetailScreen(rememberNavController(), 1, "test@gmail.com")
 }

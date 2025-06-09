@@ -95,8 +95,9 @@ fun MainScreen(navController: NavHostController) {
 
     val dataStore = SettingsDataStore(context)
     val user by dataStore.userFlow.collectAsState(User())
-
     val showList by dataStore.layoutFlow.collectAsState(true)
+
+    val viewModel: MainViewModel = viewModel()
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -166,7 +167,7 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(showList, navController, Modifier.padding(innerPadding))
+        ScreenContent(showList, user.email, viewModel, navController, Modifier.padding(innerPadding))
 
         if (showDialog) {
             ProfilDialog(
@@ -182,10 +183,18 @@ fun MainScreen(navController: NavHostController) {
 }
 
 @Composable
-fun ScreenContent(showList: Boolean, navController: NavHostController, modifier: Modifier = Modifier) {
-    val viewModel: MainViewModel = viewModel()
+fun ScreenContent(showList: Boolean,
+                  userId: String,
+                  viewModel: MainViewModel,
+                  navController: NavHostController,
+                  modifier: Modifier = Modifier
+) {
     val data by viewModel.data
     val status by viewModel.status.collectAsState()
+
+    LaunchedEffect(userId) {
+        viewModel.retrieveData(userId)
+    }
 
     when (status) {
         ApiStatus.LOADING -> {
@@ -218,7 +227,7 @@ fun ScreenContent(showList: Boolean, navController: NavHostController, modifier:
                     ) {
                         items(data) {
                             ListItem(reading = it) {
-                                navController.navigate(Screen.DetailScreen.withId(it.id))
+                                navController.navigate(Screen.DetailScreen.withId(it.id, userId))
                             }
                             HorizontalDivider()
                         }
@@ -253,7 +262,7 @@ fun ScreenContent(showList: Boolean, navController: NavHostController, modifier:
                     textAlign = TextAlign.Center
                 )
                 Button(
-                    onClick = { viewModel.retrieveData() },
+                    onClick = { viewModel.retrieveData(userId) },
                     modifier = Modifier.padding(top = 16.dp),
                     contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                 ) {

@@ -341,6 +341,8 @@ fun ButtonNCounter(
         }
 
         if (isClicked) {
+            val bottomPadding = if (data.imageUrl != null) 80 else 0
+
             Column(modifier = Modifier.padding(top = 16.dp, bottom = 5.dp)) {
                 Text(text = stringResource(R.string.pages_read))
             }
@@ -392,7 +394,7 @@ fun ButtonNCounter(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = bottomPadding.dp)
             ) {
                 IconButton(
                     onClick = {

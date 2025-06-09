@@ -55,10 +55,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -170,7 +172,10 @@ fun MainScreen(navController: NavHostController) {
             ProfilDialog(
                 user = user,
                 onDismissRequest = { showDialog = false },
-                onConfirmation = { showDialog = false }
+                onConfirmation = {
+                    CoroutineScope(Dispatchers.IO).launch { signOut(context, dataStore) }
+                    showDialog = false
+                }
             )
         }
     }
@@ -428,6 +433,18 @@ private suspend fun handleSignIn(
     }
     else {
         Log.e("SIGN-IN", "Error: unrecognized customcredential type.")
+    }
+}
+
+private suspend fun signOut(context: Context, dataStore: SettingsDataStore) {
+    try {
+        val credentialManager = CredentialManager.create(context)
+        credentialManager.clearCredentialState(
+            ClearCredentialStateRequest()
+        )
+        dataStore.saveData(User())
+    } catch (e: ClearCredentialException) {
+        Log.e("SIGN-IN", "Error ${e.errorMessage}")
     }
 }
 

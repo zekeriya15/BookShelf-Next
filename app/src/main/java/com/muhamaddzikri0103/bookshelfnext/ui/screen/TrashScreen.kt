@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,45 +45,87 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
+import com.muhamaddzikri0103.bookshelfnext.model.Reading
+import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
+import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 //import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(navController: NavHostController) {
+    val viewModel: TrashViewModel = viewModel()
     val context = LocalContext.current
-//    val factory = ViewModelFactory(context)
-//    val viewModel: TrashViewModel = viewModel(factory = factory)
+
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                title = {
+                    Text(text = stringResource(id = R.string.bin))
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                ),
+                actions = {
+                    DeleteAllMenu(onDelete = { showDeleteAllDialog = true })
+                }
+            )
+        }
+    ) { innerPadding ->
+        TrashContent(viewModel, Modifier.padding(innerPadding))
+
+//        when (status) {
+//            ApiStatus.LOADING -> {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    CircularProgressIndicator()
+//                }
+//            }
 //
-//    var showDeleteAllDialog by remember { mutableStateOf(false) }
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                navigationIcon = {
-//                    IconButton(onClick = { navController.popBackStack() }) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                            contentDescription = stringResource(R.string.back),
-//                            tint = MaterialTheme.colorScheme.primary
+//            ApiStatus.SUCCESS -> {
+//                if (data.isEmpty()) {
+//                    Column(
+//                        modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+//                        verticalArrangement = Arrangement.Center,
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        Text(
+//                            text = stringResource(R.string.empty_list),
+//                            textAlign = TextAlign.Center
 //                        )
 //                    }
-//                },
-//                title = {
-//                    Text(text = stringResource(id = R.string.bin))
-//                },
-//                colors = TopAppBarDefaults.mediumTopAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                    titleContentColor = MaterialTheme.colorScheme.primary
-//                ),
-//                actions = {
-//                    DeleteAllMenu(onDelete = { showDeleteAllDialog = true })
+//                } else {
+//                    LazyColumn(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentPadding = PaddingValues(bottom = 84.dp)
+//                    ) {
+//                        items(data) {
+//                            ListItem(reading = it) {}
+//                            HorizontalDivider()
+//                        }
+//                    }
 //                }
-//            )
-//        }
-//    ) { innerPadding ->
-//        TrashContent(viewModel, Modifier.padding(innerPadding))
+//            }
 //
+//            ApiStatus.FAILED -> {
+//
+//            }
+//        }
+
 //        if (showDeleteAllDialog) {
 //            DisplayAlertDialog(
 //                displayText = stringResource(R.string.confirm_delete_all),
@@ -96,75 +139,95 @@ fun TrashScreen(navController: NavHostController) {
 //                }
 //            )
 //        }
-//    }
+    }
 }
 
 @Composable
 fun TrashContent(viewModel: TrashViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-//    val data by viewModel.data.collectAsState()
-//    val data = emptyList<BookAndReading>()
+    // Collect states from the ViewModel directly within this Composable
+    val deletedDatas by viewModel.deletedDatas
+    val status by viewModel.status.collectAsState()
+
+    var showDeleteItemDialog by remember { mutableStateOf(false) }
+    var itemToDeletePermanently by remember { mutableStateOf<Reading?>(null) }
 
     var showDialog by remember { mutableStateOf(false) }
-    var itemToDelete by remember { mutableStateOf<BookAndReading?>(null) }
+//    var itemToDelete by remember { mutableStateOf<BookAndReading?>(null) }
 
-
-//    if (data.isEmpty()) {
-//        Column(
-//            modifier = modifier.fillMaxSize().padding(16.dp),
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(
-//                text = stringResource(R.string.nodata_bin),
-//                textAlign = TextAlign.Center
-//            )
-//        }
-//    }
-//    else {
-//        LazyColumn(
-//            modifier = modifier.fillMaxSize(),
-//            contentPadding = PaddingValues(bottom = 84.dp)
-//        ) {
-//            items(data) { item ->
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Box(modifier = Modifier.weight(1f)) {
-//                        ListItem(reading = item) {}
-//                    }
-//                    TrashItemMenu(
-//                        onRestore = {
-//                            viewModel.restore(item.readingId)
-//                            Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
-//                        },
-//                        onDelete = {
-//                            itemToDelete = item
-//                            showDialog = true
-//                        }
-//                    )
-//                }
-//                HorizontalDivider()
-//            }
-//        }
-//    }
-
-    if (showDialog && itemToDelete != null) {
-        DisplayAlertDialog(
-            displayText = stringResource(R.string.confirm_delete),
-            confirmText = stringResource(R.string.delete),
-            dismissText = stringResource(R.string.cancel),
-            onDismissRequest = { showDialog = false },
-            onConfirmation = {
-                viewModel.delete(itemToDelete!!)
-                Toast.makeText(context, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
-                showDialog = false
+    when (status) {
+        ApiStatus.LOADING -> {
+            Box(
+                modifier = modifier.fillMaxSize(), // Use the passed modifier
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        )
+        }
+
+        ApiStatus.FAILED -> {
+
+        }
+
+        ApiStatus.SUCCESS -> {
+            if (deletedDatas.isEmpty()) {
+                Column(
+                    modifier = modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.nodata_bin),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 84.dp)
+                ) {
+                    items(deletedDatas) { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                ListItem(reading = item) {}
+                            }
+                            TrashItemMenu(
+                                onRestore = {
+//                                    viewModel.restore(item.id)
+//                                    Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
+                                },
+                                onDelete = {
+                                    itemToDeletePermanently = item
+                                    showDeleteItemDialog = true
+                                }
+                            )
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
     }
+
+
+//    if (showDialog && itemToDelete != null) {
+//        DisplayAlertDialog(
+//            displayText = stringResource(R.string.confirm_delete),
+//            confirmText = stringResource(R.string.delete),
+//            dismissText = stringResource(R.string.cancel),
+//            onDismissRequest = { showDialog = false },
+//            onConfirmation = {
+//                viewModel.delete(itemToDelete!!)
+//                Toast.makeText(context, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
+//                showDialog = false
+//            }
+//        )
+//    }
 
 }
 

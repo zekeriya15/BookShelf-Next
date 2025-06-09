@@ -28,11 +28,28 @@ class MainViewModel() : ViewModel() {
         retrieveData()
     }
 
+//    fun retrieveData() {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            status.value = ApiStatus.LOADING
+//            try {
+//                val result = ReadingsApi.service.getReadings("__admin__")
+////                Log.d("MainViewModel", "Success $result")
+//                data.value = result
+//                status.value = ApiStatus.SUCCESS
+//            } catch (e: Exception) {
+//                Log.d("MainViewModel", "Failure: ${e.message}")
+//                status.value = ApiStatus.FAILED
+//            }
+//        }
+//    }
+
     fun retrieveData() {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
-                val result = ReadingsApi.service.getReadings("__admin__")
+                val result = ReadingsApi.service.getReadings(
+                    "yakup15@gmail.com",
+                    "false")
 //                Log.d("MainViewModel", "Success $result")
                 data.value = result
                 status.value = ApiStatus.SUCCESS

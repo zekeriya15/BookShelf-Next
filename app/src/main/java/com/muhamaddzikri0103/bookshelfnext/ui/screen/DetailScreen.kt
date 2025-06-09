@@ -134,6 +134,22 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                 }
             }
 
+            ApiStatus.SUCCESS -> {
+                if (data != null) {
+                    ReadingDetail(
+                        data = data!!,
+                        userId = userId,
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.empty_list),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             ApiStatus.FAILED -> {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
@@ -151,20 +167,6 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                     ) {
                         Text(text = stringResource(R.string.try_again))
                     }
-                }
-            }
-
-            ApiStatus.SUCCESS -> {
-                if (data != null) {
-                    ReadingDetail(
-                        data = data!!,
-                        viewModel = viewModel,
-                        modifier = Modifier.fillMaxSize())
-                } else {
-                    Text(
-                        text = stringResource(R.string.empty_list),
-                        textAlign = TextAlign.Center
-                    )
                 }
             }
         }
@@ -209,7 +211,7 @@ fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () ->
 }
 
 @Composable
-fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
+fun ReadingDetail(data: Reading, userId: String, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
     val imageUrl: String? = data.imageUrl
     val title = data.title
     val author = data.author
@@ -225,35 +227,39 @@ fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+//            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (imageUrl != null) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 60.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = stringResource(R.string.image, title),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.loading_img),
-                        error = painterResource(R.drawable.baseline_broken_image_24),
-                        modifier = Modifier.size(180.dp)
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(10.dp))
-                    )
-                }
+        if (imageUrl != null) {
+            Column(
+                modifier = modifier.fillMaxWidth().padding(bottom = 30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+//                    contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = stringResource(R.string.image, title),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.loading_img),
+                    error = painterResource(R.drawable.baseline_broken_image_24),
+                    modifier = Modifier.size(180.dp)
+                        .aspectRatio(2f / 3f)
+                        .clip(RoundedCornerShape(10.dp))
+                )
             }
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
@@ -305,24 +311,19 @@ fun ReadingDetail(data: Reading, viewModel: UpsertViewModel, modifier: Modifier 
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Start
             )
-//                    ButtonNCounter(data, pagesLeft, viewModel, onProgressUpdate = {
-//                        currentPage = it
-//                    }, onDateModifiedUpdate = {
-//                        dateModified = it
-//                    })
+            ButtonNCounter(data, userId, pagesLeft, viewModel)
         }
     }
 }
 
 @Composable
 fun ButtonNCounter(
-    data: BookAndReading,
+    data: Reading,
+    userId: String,
     pagesLeft: Int,
-    viewModel: UpsertViewModel,
-    onProgressUpdate: (Int) -> Unit,
-    onDateModifiedUpdate: (String) -> Unit
+    viewModel: UpsertViewModel
 ) {
-    var currentPage by remember { mutableIntStateOf(data.currentPage) }
+    val currentPage by remember { mutableIntStateOf(data.currentPage) }
     var isClicked by remember { mutableStateOf(false) }
     var amount by remember { mutableIntStateOf(0) }
     var totalPagesRead by remember { mutableIntStateOf(0) }
@@ -391,29 +392,15 @@ fun ButtonNCounter(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp)
             ) {
                 IconButton(
                     onClick = {
-//                        isClicked = false
-//                        totalPagesRead = currentPage + amount
-//                        amount = 0
-////                        val formattedNow = formatter.format(Date())
-//
-////                        viewModel.update(
-////                            bookId = data.bookId,
-////                            title = data.title,
-////                            author = data.author,
-////                            genre = data.genre,
-////                            numOfPages = data.numOfPages.toString(),
-////                            readingId = data.readingId,
-////                            currentPage = totalPagesRead.toString(),
-////                            dateModified = formattedNow
-////                        )
-//
-//                        currentPage = totalPagesRead
-//                        onProgressUpdate(totalPagesRead)
-//                        onDateModifiedUpdate(formattedNow)
+                        isClicked = false
+                        totalPagesRead = currentPage + amount
+                        amount = 0
+
+                        viewModel.addPages(data.id, userId, totalPagesRead)
                     },
                     modifier = Modifier
                         .size(56.dp)

@@ -1,6 +1,7 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muhamaddzikri0103.bookshelfnext.database.BookshelfDao
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,6 +25,9 @@ import java.util.Locale
 class UpsertViewModel() : ViewModel() {
 
     var status = MutableStateFlow(ApiStatus.LOADING)
+        private set
+
+    var errorMessage = mutableStateOf<String?>(null)
         private set
 
     private val _currentReading = MutableStateFlow<Reading?>(null)
@@ -42,17 +48,26 @@ class UpsertViewModel() : ViewModel() {
         }
     }
 
-//    fun addPages(readingId: Int, currentPage: Int) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//          try {
-//              val result = ReadingsApi.service.updateCurrentPage(
-//                  readingId = readingId.toString(),
-//                  userId = "yakup15@gmail.com",
-//                  currentPage = currentPage.toRequestBody())
-//
-//          }
-//        }
-//    }
+    fun addPages(readingId: Int, userId: String, currentPage: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+          try {
+              val result = ReadingsApi.service.updateCurrentPage(
+                  readingId = readingId,
+                  userId = userId,
+                  currentPage = currentPage.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+              )
+
+              if (result.status == "success") {
+                  retrieveDataById(readingId, userId)
+              } else {
+                  throw Exception(result.message)
+              }
+          } catch (e: Exception) {
+              Log.d("UpsertViewModel", "Failure: ${e.message}")
+              errorMessage.value = "Error: ${e.message}"
+          }
+        }
+    }
 
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
 

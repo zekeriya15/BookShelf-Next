@@ -10,6 +10,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 //import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -40,14 +41,14 @@ interface BookshelfApiService {
 
     @GET("readings/{id}")
     suspend fun getReadingById(
-//        @Path("id") readingId: String,
         @Path("id") readingId: Int,
         @Header("Authorization") userId: String
     ): Reading
 
+    @Multipart
     @PUT("readings/{id}")
     suspend fun updateCurrentPage(
-        @Path("id") readingId: String,
+        @Path("id") readingId: Int,
         @Header("Authorization") userId: String,
         @Part("currentPage") currentPage: RequestBody
     ): OpStatus

@@ -31,7 +31,7 @@ class UpsertViewModel() : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
-                val result = ReadingsApi.service.getReadingById(readingId = readingId.toString(),"__admin__")
+                val result = ReadingsApi.service.getReadingById(readingId = readingId.toString(),"yakup15@gmail.com")
 //                Log.d("MainViewModel", "Success $result")
                 _currentReading.value = result
                 status.value = ApiStatus.SUCCESS
@@ -41,6 +41,18 @@ class UpsertViewModel() : ViewModel() {
             }
         }
     }
+
+//    fun addPages(readingId: Int, currentPage: Int) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//          try {
+//              val result = ReadingsApi.service.updateCurrentPage(
+//                  readingId = readingId.toString(),
+//                  userId = "yakup15@gmail.com",
+//                  currentPage = currentPage.toRequestBody())
+//
+//          }
+//        }
+//    }
 
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
 

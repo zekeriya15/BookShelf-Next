@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +48,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.text.isDigitsOnly
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
@@ -57,15 +61,16 @@ fun UpsertDialog(
     onDeleteImage: () -> Unit,
     onChangeImage: () -> Unit,
     onDismissRequest: () -> Unit,
-    onConfirmation: (title: String,
-                     author: String,
-                     genre: String,
-                     numOfPages: Int,
-                     bitmap: Bitmap?) -> Unit
+    onAddConfirmation: ((title: String, author: String,
+                     genre: String, numOfPages: Int,
+                     bitmap: Bitmap?) -> Unit)?,
+    onEditConfirmation: ((title: String, author: String,
+                          genre: String, numOfPages: Int,
+                          currentPage: Int, bitmap: Bitmap?) -> Unit)?
+
 ) {
     val context: Context = LocalContext.current
 
-//    var bookId by remember { mutableLongStateOf(0) }
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
 
@@ -85,9 +90,29 @@ fun UpsertDialog(
 
     var genre by remember { mutableStateOf(radioOptions[0]) }
     var pages by remember { mutableStateOf("") }
-//    var currPages by remember { mutableStateOf("") }
-//    var dateModified by remember { mutableStateOf("") }
+    var currPages by remember { mutableStateOf("") }
 
+    LaunchedEffect(reading) {
+        reading?.let { bookData ->
+            title = bookData.title
+            author = bookData.author
+            genre = bookData.genre
+            pages = bookData.pages.toString()
+            currPages = bookData.currentPage.toString()
+        } ?: run {
+            title = ""
+            author = ""
+            genre = radioOptions[0]
+            pages = ""
+            currPages = "0"
+        }
+    }
+
+    var currentImage by remember { mutableStateOf<String?>(null) }
+
+    if (reading?.imageUrl != null) {
+        currentImage = reading.imageUrl
+    }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -98,17 +123,34 @@ fun UpsertDialog(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = if (bitmap != null) {
-                        remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
-                    } else {
-                        painterResource(R.drawable.baseline_broken_image_24)
-                    },
-                    contentDescription = null,
-                    modifier = Modifier.width(90.dp)
-                        .aspectRatio(2f / 3f)
-                        .clip(RoundedCornerShape(10.dp))
-                )
+                if (reading?.imageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(currentImage)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = stringResource(R.string.image, reading.title),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.loading_img),
+                        error = painterResource(R.drawable.baseline_broken_image_24),
+                        modifier = Modifier.width(80.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                } else {
+                    Image(
+                        painter = if (bitmap != null) {
+                            remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
+                        } else {
+                            painterResource(R.drawable.baseline_broken_image_24)
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.width(90.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.Center
@@ -116,6 +158,7 @@ fun UpsertDialog(
                     OutlinedButton(
                         onClick = {
                             onDeleteImage()
+                            currentImage = null
                         },
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
@@ -134,8 +177,7 @@ fun UpsertDialog(
                 }
 
                 BookForm(
-//                    isEditing = reading != null,
-                    isEditing = false,
+                    isEditing = reading != null,
                     title = title,
                     onTitleChange = { title = it },
                     author = author,
@@ -144,14 +186,18 @@ fun UpsertDialog(
                     onGenreChange = { genre = it },
                     pages = pages,
                     onPagesChange = { pages = it },
-                    currPages = "",
-                    onCurrPagesChange = { },
+                    currPages = currPages,
+                    onCurrPagesChange = { currPages = it },
                     radioOptions = radioOptions,
-                    modifier = Modifier.fillMaxWidth() // Ensure form fills width within card
+                    modifier = Modifier.fillMaxWidth()
                 )
 
+                val totalPagesInt = pages.toIntOrNull() ?: 0
+                val currPagesInt = currPages.toIntOrNull() ?: 0
+
                 val isFormInvalid = title.isBlank() || author.isBlank() ||
-                        genre.isBlank() || pages.isBlank() || pages == "0"
+                        genre.isBlank() || pages.isBlank() || pages == "0" ||
+                        (reading != null && currPagesInt > totalPagesInt)
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -165,14 +211,18 @@ fun UpsertDialog(
                     }
                     OutlinedButton(
                         onClick = {
-                            val totalPagesInt = pages.toInt()
-
                             if (isFormInvalid) {
                                 Toast.makeText(context, R.string.invalid, Toast.LENGTH_SHORT).show()
                                 return@OutlinedButton
                             }
 
-                            onConfirmation(title, author, genre, totalPagesInt, bitmap)
+                            if (reading == null) {
+                                onAddConfirmation?.invoke(title, author,
+                                    genre, totalPagesInt, bitmap)
+                            } else {
+                                onEditConfirmation?.invoke(title, author, genre,
+                                    totalPagesInt, currPagesInt, bitmap)
+                            }
                             onDismissRequest()
                         },
                         enabled = !isFormInvalid,
@@ -237,11 +287,11 @@ fun BookForm(
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = if (isEditing) ImeAction.Next else ImeAction.Done // Adjust imeAction based on editing
+                imeAction = if (isEditing) ImeAction.Next else ImeAction.Done
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        if (isEditing) { // Show currPages only if in editing mode
+        if (isEditing) {
             HorizontalDivider()
             OutlinedTextField(
                 value = currPages,
@@ -316,7 +366,8 @@ fun UpsertDialogPreview() {
             onDeleteImage = { },
             onChangeImage = { },
             onDismissRequest = { },
-            onConfirmation = { _, _, _, _, _-> }
+            onAddConfirmation = { _, _, _, _, _-> },
+            onEditConfirmation = null
         )
     }
 }

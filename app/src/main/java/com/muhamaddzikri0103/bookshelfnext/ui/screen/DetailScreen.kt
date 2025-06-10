@@ -2,8 +2,10 @@ package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +63,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
@@ -88,6 +93,13 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
     val errorMessage by viewModel.errorMessage
+
+    var bitmap: Bitmap? by remember { mutableStateOf(null) }
+    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
+        bitmap = getCroppedImage(context.contentResolver, it)
+    }
+
+    var showUpsertDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) {
         viewModel.retrieveDataById(id, userId)
@@ -117,7 +129,10 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    UpdateNDelete(navController, id, userId,
+                    UpdateNDelete(
+                        onEditClick = {
+                            showUpsertDialog = true
+                        },
                         onMoveClick = {
                             viewModel.softDelete(id, userId)
                             navController.popBackStack()
@@ -181,14 +196,35 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                 }
             }
         }
+
+        if (showUpsertDialog) {
+            UpsertDialog(
+                reading = data,
+                bitmap = bitmap,
+                onDeleteImage = { bitmap = null },
+                onChangeImage = {
+                    val options = CropImageContractOptions(
+                        null, CropImageOptions(
+                            imageSourceIncludeGallery = false,
+                            imageSourceIncludeCamera = true,
+                            fixAspectRatio = true,
+                            aspectRatioX = 2,
+                            aspectRatioY = 3
+                        )
+                    )
+                    launcher.launch(options)
+                },
+                onDismissRequest = { showUpsertDialog = false },
+                onAddConfirmation = null,
+                onEditConfirmation = null
+            )
+        }
     }
 }
 
 @Composable
 fun UpdateNDelete(
-    navController: NavHostController,
-    id: Int,
-    userId: String,
+    onEditClick: () -> Unit,
     onMoveClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -207,8 +243,8 @@ fun UpdateNDelete(
                     Text(text = stringResource(R.string.edit_book))
                 },
                 onClick = {
-//                    expanded = false
-//                    navController.navigate(Screen.UpdateForm.withId(id))
+                    expanded = false
+                    onEditClick()
                 }
             )
             DropdownMenuItem(
@@ -222,7 +258,6 @@ fun UpdateNDelete(
             )
         }
     }
-
 }
 
 @Composable

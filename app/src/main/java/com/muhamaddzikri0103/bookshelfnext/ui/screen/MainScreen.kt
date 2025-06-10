@@ -226,7 +226,7 @@ fun MainScreen(navController: NavHostController) {
                     launcher.launch(options)
                 },
                 onDismissRequest = { showUpsertDialog = false },
-                onConfirmation = { title, author, genre, pages, bitmap ->
+                onAddConfirmation = { title, author, genre, pages, bitmap ->
 //                    Log.d("TAMBAH", "$title, $author, $genre, $numOfPages")
                     viewModel.saveData(
                         userId = user.email,
@@ -237,7 +237,8 @@ fun MainScreen(navController: NavHostController) {
                         pages = pages
                         )
                     showUpsertDialog = false
-                }
+                },
+                onEditConfirmation = null
             )
         }
 
@@ -535,7 +536,7 @@ private suspend fun signOut(context: Context, dataStore: SettingsDataStore) {
     }
 }
 
-private fun getCroppedImage(
+fun getCroppedImage(
     resolver: ContentResolver,
     result: CropImageView.CropResult
 ): Bitmap? {

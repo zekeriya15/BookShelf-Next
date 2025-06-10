@@ -1,5 +1,6 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,7 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -84,65 +87,35 @@ class DetailViewModel() : ViewModel() {
         }
     }
 
-    private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+    fun deleteImage(readingId: Int, userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = ReadingsApi.service.deleteImage(readingId, userId)
 
-//    fun insert(
-//        title: String,
-//        author: String,
-//        genre: String,
-//        numOfPages: String,
-//    ) {
-//        val book = Book(
-//            title = title,
-//            author = author,
-//            genre = genre,
-//            numOfPages = numOfPages.toInt()
-//        )
-//        val reading = ReadingOld(
-//            dateModified = formatter.format(Date())
-//        )
-//        viewModelScope.launch(Dispatchers.IO) {
-//            dao.insertBookAndReading(book, reading)
-//        }
-//    }
-//
-//    fun getBookAndReadingById(readingId: Long): Flow<BookAndReading> {
-//        return dao.getBookAndReadingByReadingId(readingId)
-//    }
-//
-//    fun update(
-//        bookId: Long,
-//        title: String,
-//        author: String,
-//        genre: String,
-//        numOfPages: String,
-//        readingId: Long,
-//        currentPage: String,
-//        dateModified: String = formatter.format(Date())
-//    ) {
-//        val book = Book(
-//            id = bookId,
-//            title = title,
-//            author = author,
-//            genre = genre,
-//            numOfPages = numOfPages.toInt()
-//        )
-//        val reading = ReadingOld(
-//            id = readingId,
-//            bookId = bookId,
-//            currentPage = currentPage.toIntOrNull() ?: 0,
-//            dateModified = dateModified
-//        )
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//            dao.updateBookAndReading(book, reading)
-//        }
-//    }
-//
-//    fun softDelete(readingId: Long) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            dao.softDeleteReading(readingId)
-//        }
-//    }
+                if (result.status == "success") {
+                    retrieveDataById(readingId, userId)
+                } else {
+                    throw Exception(result.message)
+                }
+            } catch (e: Exception) {
+                Log.d("DetailViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
+
+    private fun Bitmap.toMultipartBody(): MultipartBody.Part {
+        val stream = ByteArrayOutputStream()
+        compress(Bitmap.CompressFormat.JPEG, 80, stream)
+        val byteArray = stream.toByteArray()
+        val requestBody = byteArray.toRequestBody(
+            "image/jpg".toMediaTypeOrNull(), 0, byteArray.size
+        )
+        return MultipartBody.Part.createFormData(
+            "image", "image.jpg", requestBody
+        )
+    }
+
+    fun clearMessage() { errorMessage.value = null }
 
 }

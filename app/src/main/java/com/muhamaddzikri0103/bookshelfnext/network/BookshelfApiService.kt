@@ -8,6 +8,7 @@ import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 //import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -60,6 +61,17 @@ interface BookshelfApiService {
         @Path("id") readingId: Int,
         @Header("Authorization") userId: String,
         @Body isDeletedStatus: Map<String, Boolean>
+    ): OpStatus
+
+    @DELETE("readings/{id}")
+    suspend fun deleteReadingById(
+        @Path("id") readingId: Int,
+        @Header("Authorization") userId: String
+    ): OpStatus
+
+    @DELETE("readings/deleted")
+    suspend fun deleteSoftDeletedReadings(
+        @Header("Authorization") userId: String
     ): OpStatus
 }
 

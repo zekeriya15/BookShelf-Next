@@ -38,7 +38,7 @@ class TrashViewModel() : ViewModel() {
                 deletedDatas.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {
-                Log.d("MainViewModel", "Failure: ${e.message}")
+                Log.d("TrashViewModel", "Failure: ${e.message}")
                 status.value = ApiStatus.FAILED
             }
         }
@@ -59,33 +59,45 @@ class TrashViewModel() : ViewModel() {
                     throw Exception(result.message)
                 }
             } catch (e: Exception) {
-                Log.d("UpsertViewModel", "Failure: ${e.message}")
+                Log.d("TrashViewModel", "Failure: ${e.message}")
                 errorMessage.value = "Error: ${e.message}"
             }
         }
     }
 
-//    val data: StateFlow<List<BookAndReading>> = dao.getDeletedBookAndReading().stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(),
-//        initialValue = emptyList()
-//    )
-//
-//    fun restore(readingId: Long) {
-//        viewModelScope.launch {
-//            dao.restoreReading(readingId)
-//        }
-//    }
-//
-//    fun delete(bookNReading: BookAndReading) {
-//        viewModelScope.launch {
-//            dao.hardDeleteBookAndReading(bookNReading)
-//        }
-//    }
-//
-//    fun deleteAllTrash() {
-//        viewModelScope.launch {
-//            dao.hardDeleteAllTrash()
-//        }
-//    }
+    fun hardDelete(readingId: Int, userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = ReadingsApi.service.deleteReadingById(readingId, userId)
+
+                if (result.status == "success") {
+                    retrieveDeletedDatas(userId)
+                } else {
+                    throw Exception(result.message)
+                }
+            } catch (e: Exception) {
+                Log.d("TrashViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
+
+    fun deleteAllTrash(userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = ReadingsApi.service.deleteSoftDeletedReadings(userId)
+
+                if (result.status == "success") {
+                    retrieveDeletedDatas(userId)
+                } else {
+                    throw Exception(result.message)
+                }
+            } catch (e: Exception) {
+                Log.d("TrashViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
+
+
 }

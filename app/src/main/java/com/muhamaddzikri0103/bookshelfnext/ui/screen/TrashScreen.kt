@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,7 +53,6 @@ import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
-//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,21 +136,19 @@ fun TrashScreen(navController: NavHostController, userId: String) {
             }
         }
 
-
-
-//        if (showDeleteAllDialog) {
-//            DisplayAlertDialog(
-//                displayText = stringResource(R.string.confirm_delete_all),
-//                confirmText = stringResource(R.string.delete),
-//                dismissText = stringResource(R.string.cancel),
-//                onDismissRequest = { showDeleteAllDialog = false },
-//                onConfirmation = {
-//                    viewModel.deleteAllTrash()
-//                    Toast.makeText(context, R.string.toast_deleted_all, Toast.LENGTH_SHORT).show()
-//                    showDeleteAllDialog = false
-//                }
-//            )
-//        }
+        if (showDeleteAllDialog) {
+            DisplayAlertDialog(
+                displayText = stringResource(R.string.confirm_delete_all),
+                confirmText = stringResource(R.string.delete),
+                dismissText = stringResource(R.string.cancel),
+                onDismissRequest = { showDeleteAllDialog = false },
+                onConfirmation = {
+                    viewModel.deleteAllTrash(userId)
+                    Toast.makeText(context, R.string.toast_deleted_all, Toast.LENGTH_SHORT).show()
+                    showDeleteAllDialog = false
+                }
+            )
+        }
     }
 }
 
@@ -158,11 +156,8 @@ fun TrashScreen(navController: NavHostController, userId: String) {
 fun TrashContent(data: List<Reading>, userId: String, viewModel: TrashViewModel, modifier: Modifier = Modifier) {
     val context: Context = LocalContext.current
 
-    var showDeleteItemDialog by remember { mutableStateOf(false) }
-    var itemToDeletePermanently by remember { mutableStateOf<Reading?>(null) }
-
     var showDialog by remember { mutableStateOf(false) }
-//    var itemToDelete by remember { mutableStateOf<BookAndReading?>(null) }
+    var itemToDelete by remember { mutableStateOf<Reading?>(null) }
 
     if (data.isEmpty()) {
         Column(
@@ -196,8 +191,8 @@ fun TrashContent(data: List<Reading>, userId: String, viewModel: TrashViewModel,
                             Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
                         },
                         onDelete = {
-//                                    itemToDeletePermanently = item
-//                                    showDeleteItemDialog = true
+                            itemToDelete = item
+                            showDialog = true
                         }
                     )
                 }
@@ -206,21 +201,19 @@ fun TrashContent(data: List<Reading>, userId: String, viewModel: TrashViewModel,
         }
     }
 
-
-//    if (showDialog && itemToDelete != null) {
-//        DisplayAlertDialog(
-//            displayText = stringResource(R.string.confirm_delete),
-//            confirmText = stringResource(R.string.delete),
-//            dismissText = stringResource(R.string.cancel),
-//            onDismissRequest = { showDialog = false },
-//            onConfirmation = {
-//                viewModel.delete(itemToDelete!!)
-//                Toast.makeText(context, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
-//                showDialog = false
-//            }
-//        )
-//    }
-
+    if (showDialog && itemToDelete != null) {
+        DisplayAlertDialog(
+            displayText = stringResource(R.string.confirm_delete),
+            confirmText = stringResource(R.string.delete),
+            dismissText = stringResource(R.string.cancel),
+            onDismissRequest = { showDialog = false },
+            onConfirmation = {
+                viewModel.hardDelete(itemToDelete!!.id, userId)
+                Toast.makeText(context, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
+                showDialog = false
+            }
+        )
+    }
 }
 
 @Composable

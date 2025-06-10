@@ -8,6 +8,7 @@ import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -108,6 +109,7 @@ fun MainScreen(navController: NavHostController) {
     val showList by dataStore.layoutFlow.collectAsState(true)
 
     val viewModel: MainViewModel = viewModel()
+    val errorMessage by viewModel.errorMessage
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -224,11 +226,24 @@ fun MainScreen(navController: NavHostController) {
                     launcher.launch(options)
                 },
                 onDismissRequest = { showUpsertDialog = false },
-                onConfirmation = { title, author, genre, numOfPages, bitmap ->
-                    Log.d("TAMBAH", "$title, $author, $genre, $numOfPages")
+                onConfirmation = { title, author, genre, pages, bitmap ->
+//                    Log.d("TAMBAH", "$title, $author, $genre, $numOfPages")
+                    viewModel.saveData(
+                        userId = user.email,
+                        bitmap = bitmap,
+                        title = title,
+                        author = author,
+                        genre = genre,
+                        pages = pages
+                        )
                     showUpsertDialog = false
                 }
             )
+        }
+
+        if (errorMessage != null) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            viewModel.clearMessage()
         }
     }
 }

@@ -4,6 +4,7 @@ import com.muhamaddzikri0103.bookshelfnext.model.OpStatus
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -14,6 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -72,6 +74,17 @@ interface BookshelfApiService {
     @DELETE("readings/deleted")
     suspend fun deleteSoftDeletedReadings(
         @Header("Authorization") userId: String
+    ): OpStatus
+
+    @Multipart
+    @POST("readings")
+    suspend fun addReading(
+        @Header("Authorization") userId: String,
+        @Part image: MultipartBody.Part?,
+        @Part("title") title: RequestBody,
+        @Part("author") author: RequestBody,
+        @Part("genre") genre: RequestBody,
+        @Part("pages") pages: RequestBody,
     ): OpStatus
 }
 

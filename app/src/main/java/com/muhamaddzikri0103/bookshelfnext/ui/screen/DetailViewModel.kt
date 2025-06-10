@@ -4,25 +4,19 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.muhamaddzikri0103.bookshelfnext.database.BookshelfDao
-import com.muhamaddzikri0103.bookshelfnext.model.Book
-import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
-import com.muhamaddzikri0103.bookshelfnext.model.ReadingOld
 import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.network.ReadingsApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
-class UpsertViewModel() : ViewModel() {
+class DetailViewModel() : ViewModel() {
 
     var status = MutableStateFlow(ApiStatus.LOADING)
         private set
@@ -42,7 +36,7 @@ class UpsertViewModel() : ViewModel() {
                 _currentReading.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {
-                Log.d("MainViewModel", "Failure: ${e.message}")
+                Log.d("DetailViewModel", "Failure: ${e.message}")
                 status.value = ApiStatus.FAILED
             }
         }
@@ -63,7 +57,7 @@ class UpsertViewModel() : ViewModel() {
                   throw Exception(result.message)
               }
           } catch (e: Exception) {
-              Log.d("UpsertViewModel", "Failure: ${e.message}")
+              Log.d("DetailViewModel", "Failure: ${e.message}")
               errorMessage.value = "Error: ${e.message}"
           }
         }
@@ -84,7 +78,7 @@ class UpsertViewModel() : ViewModel() {
                     throw Exception(result.message)
                 }
             } catch (e: Exception) {
-                Log.d("UpsertViewModel", "Failure: ${e.message}")
+                Log.d("DetailViewModel", "Failure: ${e.message}")
                 errorMessage.value = "Error: ${e.message}"
             }
         }

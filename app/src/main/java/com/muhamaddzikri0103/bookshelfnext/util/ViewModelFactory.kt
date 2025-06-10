@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.muhamaddzikri0103.bookshelfnext.database.BookshelfDb
 import com.muhamaddzikri0103.bookshelfnext.ui.screen.MainViewModel
 import com.muhamaddzikri0103.bookshelfnext.ui.screen.TrashViewModel
-import com.muhamaddzikri0103.bookshelfnext.ui.screen.UpsertViewModel
+import com.muhamaddzikri0103.bookshelfnext.ui.screen.DetailViewModel
 
 //class ViewModelFactory (
 //    private val context: Context

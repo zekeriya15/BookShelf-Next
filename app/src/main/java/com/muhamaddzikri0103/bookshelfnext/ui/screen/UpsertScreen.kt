@@ -249,52 +249,52 @@ fun BookForm(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GenreDropdown(
-    genre: String,
-    onGenreChange: (String) -> Unit,
-    radioOptions: List<String>
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = { isExpanded = !isExpanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = genre,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Genre") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-        ExposedDropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
-        ) {
-            radioOptions.forEach { value ->
-                if (value == "") {
-                    HorizontalDivider()
-                } else {
-                    DropdownMenuItem(
-                        text = { Text(value) },
-                        onClick = {
-                            onGenreChange(value)
-                            isExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun GenreDropdown(
+//    genre: String,
+//    onGenreChange: (String) -> Unit,
+//    radioOptions: List<String>
+//) {
+//    var isExpanded by remember { mutableStateOf(false) }
+//
+//    ExposedDropdownMenuBox(
+//        expanded = isExpanded,
+//        onExpandedChange = { isExpanded = !isExpanded },
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        OutlinedTextField(
+//            value = genre,
+//            onValueChange = {},
+//            readOnly = true,
+//            label = { Text("Genre") },
+//            trailingIcon = {
+//                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+//            },
+//            modifier = Modifier
+//                .menuAnchor()
+//                .fillMaxWidth()
+//        )
+//        ExposedDropdownMenu(
+//            expanded = isExpanded,
+//            onDismissRequest = { isExpanded = false }
+//        ) {
+//            radioOptions.forEach { value ->
+//                if (value == "") {
+//                    HorizontalDivider()
+//                } else {
+//                    DropdownMenuItem(
+//                        text = { Text(value) },
+//                        onClick = {
+//                            onGenreChange(value)
+//                            isExpanded = false
+//                        }
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)

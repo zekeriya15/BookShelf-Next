@@ -83,7 +83,7 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
     val context: Context = LocalContext.current
 
-    val viewModel: UpsertViewModel = viewModel()
+    val viewModel: DetailViewModel = viewModel()
 
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
@@ -226,7 +226,7 @@ fun UpdateNDelete(
 }
 
 @Composable
-fun ReadingDetail(data: Reading, userId: String, viewModel: UpsertViewModel, modifier: Modifier = Modifier) {
+fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, modifier: Modifier = Modifier) {
     val imageUrl: String? = data.imageUrl
     val title = data.title
     val author = data.author
@@ -336,7 +336,7 @@ fun ButtonNCounter(
     data: Reading,
     userId: String,
     pagesLeft: Int,
-    viewModel: UpsertViewModel
+    viewModel: DetailViewModel
 ) {
     val currentPage by remember { mutableIntStateOf(data.currentPage) }
     var isClicked by remember { mutableStateOf(false) }

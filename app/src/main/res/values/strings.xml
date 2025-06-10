@@ -52,6 +52,8 @@
     <string name="profile">Profile</string>
     <string name="close">Close</string>
     <string name="logout">Logout</string>
+    <string name="not_loggedin">Login to start tracking your readings.</string>
+    <string name="change">Change</string>
 
 
 

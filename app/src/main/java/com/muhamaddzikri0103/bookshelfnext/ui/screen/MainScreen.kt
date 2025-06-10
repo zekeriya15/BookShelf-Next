@@ -1,8 +1,14 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -67,6 +73,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -101,6 +111,13 @@ fun MainScreen(navController: NavHostController) {
 
     var showDialog by remember { mutableStateOf(false) }
 
+    var bitmap: Bitmap? by remember { mutableStateOf(null) }
+    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
+        bitmap = getCroppedImage(context.contentResolver, it)
+    }
+
+    var showUpsertDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -129,14 +146,18 @@ fun MainScreen(navController: NavHostController) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(
-                        onClick = { navController.navigate(Screen.TrashScreen.withId(user.email)) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.bin),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    if (user.email.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.TrashScreen.withId(user.email))
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.bin),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                     IconButton(onClick = {
                         if (user.email.isEmpty()) {
@@ -158,7 +179,10 @@ fun MainScreen(navController: NavHostController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate(Screen.InsertForm.route)
+                    if (user.email.isNotEmpty()) {
+                        showUpsertDialog = true
+                        bitmap = null
+                    }
                 }
             ) {
                 Icon(
@@ -178,6 +202,31 @@ fun MainScreen(navController: NavHostController) {
                 onConfirmation = {
                     CoroutineScope(Dispatchers.IO).launch { signOut(context, dataStore) }
                     showDialog = false
+                }
+            )
+        }
+
+        if (showUpsertDialog) {
+            UpsertDialog(
+                reading = null,
+                bitmap = bitmap,
+                onDeleteImage = { bitmap = null },
+                onChangeImage = {
+                    val options = CropImageContractOptions(
+                        null, CropImageOptions(
+                            imageSourceIncludeGallery = false,
+                            imageSourceIncludeCamera = true,
+                            fixAspectRatio = true,
+                            aspectRatioX = 2,
+                            aspectRatioY = 3
+                        )
+                    )
+                    launcher.launch(options)
+                },
+                onDismissRequest = { showUpsertDialog = false },
+                onConfirmation = { title, author, genre, numOfPages, bitmap ->
+                    Log.d("TAMBAH", "$title, $author, $genre, $numOfPages")
+                    showUpsertDialog = false
                 }
             )
         }
@@ -209,7 +258,7 @@ fun ScreenContent(showList: Boolean,
         }
 
         ApiStatus.SUCCESS -> {
-            if (data.isEmpty()) {
+            if (data.isEmpty() && userId.isNotEmpty()) {
                 Column(
                     modifier = modifier.fillMaxSize().padding(16.dp),
                     verticalArrangement = Arrangement.Center,
@@ -217,6 +266,18 @@ fun ScreenContent(showList: Boolean,
                 ) {
                     Text(
                         text = stringResource(R.string.empty_list),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            else if (userId.isEmpty()) {
+                Column(
+                    modifier = modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.not_loggedin),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -456,6 +517,25 @@ private suspend fun signOut(context: Context, dataStore: SettingsDataStore) {
         dataStore.saveData(User())
     } catch (e: ClearCredentialException) {
         Log.e("SIGN-IN", "Error ${e.errorMessage}")
+    }
+}
+
+private fun getCroppedImage(
+    resolver: ContentResolver,
+    result: CropImageView.CropResult
+): Bitmap? {
+    if (!result.isSuccessful) {
+        Log.e("IMAGE", "Error ${result.error}")
+        return null
+    }
+
+    val uri = result.uriContent ?: return null
+
+    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        MediaStore.Images.Media.getBitmap(resolver, uri)
+    } else {
+        val source = ImageDecoder.createSource(resolver, uri)
+        ImageDecoder.decodeBitmap(source)
     }
 }
 

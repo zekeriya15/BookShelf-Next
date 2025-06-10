@@ -7,16 +7,18 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.Body
 //import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-private const val BASE_URL = "https://4413-36-69-203-148.ngrok-free.app/"
+private const val BASE_URL = "https://ea3e-36-69-203-148.ngrok-free.app/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
@@ -51,6 +53,13 @@ interface BookshelfApiService {
         @Path("id") readingId: Int,
         @Header("Authorization") userId: String,
         @Part("currentPage") currentPage: RequestBody
+    ): OpStatus
+
+    @PATCH("readings/{id}/is-deleted")
+    suspend fun updateDeletedStatus(
+        @Path("id") readingId: Int,
+        @Header("Authorization") userId: String,
+        @Body isDeletedStatus: Map<String, Boolean>
     ): OpStatus
 }
 

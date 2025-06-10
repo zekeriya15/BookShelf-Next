@@ -24,6 +24,9 @@ class TrashViewModel() : ViewModel() {
     var status = MutableStateFlow(ApiStatus.LOADING)
         private set
 
+    var errorMessage = mutableStateOf<String?>(null)
+        private set
+
     fun retrieveDeletedDatas(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
@@ -37,6 +40,27 @@ class TrashViewModel() : ViewModel() {
             } catch (e: Exception) {
                 Log.d("MainViewModel", "Failure: ${e.message}")
                 status.value = ApiStatus.FAILED
+            }
+        }
+    }
+
+    fun restoreData(readingId: Int, userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = ReadingsApi.service.updateDeletedStatus(
+                    readingId = readingId,
+                    userId = userId,
+                    isDeletedStatus = mapOf("isDeleted" to false)
+                )
+
+                if (result.status == "success") {
+                    retrieveDeletedDatas(userId)
+                } else {
+                    throw Exception(result.message)
+                }
+            } catch (e: Exception) {
+                Log.d("UpsertViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
             }
         }
     }

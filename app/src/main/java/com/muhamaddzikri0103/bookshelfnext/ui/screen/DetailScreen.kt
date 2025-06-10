@@ -1,7 +1,9 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
+import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,10 +81,13 @@ private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
+    val context: Context = LocalContext.current
+
     val viewModel: UpsertViewModel = viewModel()
 
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
+    val errorMessage by viewModel.errorMessage
 
     LaunchedEffect(id) {
         viewModel.retrieveDataById(id, userId)
@@ -111,16 +116,22 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
-//                actions = {
-//                    UpdateNDelete(navController, id) {
-//                        viewModel.softDelete(id)
-//                        navController.popBackStack()
-//                        Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
-//                    }
-//                }
+                actions = {
+                    UpdateNDelete(navController, id, userId,
+                        onMoveClick = {
+                            viewModel.softDelete(id, userId)
+                            navController.popBackStack()
+                            Toast.makeText(context, R.string.toast_move, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
             )
         }
     ) { innerPadding ->
+
+        if (errorMessage != null) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+        }
 
         when (status) {
 
@@ -174,7 +185,11 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
 }
 
 @Composable
-fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () -> Unit) {
+fun UpdateNDelete(
+    navController: NavHostController,
+    id: Int,
+    userId: String,
+    onMoveClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     IconButton(onClick = { expanded = true }) {
@@ -192,8 +207,8 @@ fun UpdateNDelete(navController: NavHostController, id: Long, onMoveClick: () ->
                     Text(text = stringResource(R.string.edit_book))
                 },
                 onClick = {
-                    expanded = false
-                    navController.navigate(Screen.UpdateForm.withId(id))
+//                    expanded = false
+//                    navController.navigate(Screen.UpdateForm.withId(id))
                 }
             )
             DropdownMenuItem(
@@ -389,7 +404,6 @@ fun ButtonNCounter(
                         modifier = Modifier.size(30.dp)
                     )
                 }
-
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -407,7 +421,6 @@ fun ButtonNCounter(
                     modifier = Modifier
                         .size(56.dp)
                         .padding(4.dp)
-
                 ) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,

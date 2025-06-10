@@ -1,5 +1,6 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
+import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,14 @@ import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 fun TrashScreen(navController: NavHostController, userId: String) {
     val viewModel: TrashViewModel = viewModel()
 
+    val deletedDatas by viewModel.deletedDatas
+    val status by viewModel.status.collectAsState()
+    val errorMessage by viewModel.errorMessage
+
+    LaunchedEffect(userId) {
+        viewModel.retrieveDeletedDatas(userId)
+    }
+
     val context = LocalContext.current
 
     var showDeleteAllDialog by remember { mutableStateOf(false) }
@@ -87,47 +96,47 @@ fun TrashScreen(navController: NavHostController, userId: String) {
             )
         }
     ) { innerPadding ->
-        TrashContent(viewModel, userId, Modifier.padding(innerPadding))
 
-//        when (status) {
-//            ApiStatus.LOADING -> {
-//                Box(
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    CircularProgressIndicator()
-//                }
-//            }
-//
-//            ApiStatus.SUCCESS -> {
-//                if (data.isEmpty()) {
-//                    Column(
-//                        modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
-//                        verticalArrangement = Arrangement.Center,
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        Text(
-//                            text = stringResource(R.string.empty_list),
-//                            textAlign = TextAlign.Center
-//                        )
-//                    }
-//                } else {
-//                    LazyColumn(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentPadding = PaddingValues(bottom = 84.dp)
-//                    ) {
-//                        items(data) {
-//                            ListItem(reading = it) {}
-//                            HorizontalDivider()
-//                        }
-//                    }
-//                }
-//            }
-//
-//            ApiStatus.FAILED -> {
-//
-//            }
-//        }
+        if (errorMessage != null) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+        }
+
+        when (status) {
+            ApiStatus.LOADING -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            ApiStatus.SUCCESS -> {
+                TrashContent(deletedDatas, userId, viewModel, Modifier.padding(innerPadding))
+            }
+
+            ApiStatus.FAILED -> {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.error),
+                        textAlign = TextAlign.Center
+                    )
+                    Button(
+                        onClick = { viewModel.retrieveDeletedDatas(userId) },
+                        modifier = Modifier.padding(top = 16.dp),
+                        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                    ) {
+                        Text(text = stringResource(R.string.try_again))
+                    }
+                }
+            }
+        }
+
+
 
 //        if (showDeleteAllDialog) {
 //            DisplayAlertDialog(
@@ -146,15 +155,8 @@ fun TrashScreen(navController: NavHostController, userId: String) {
 }
 
 @Composable
-fun TrashContent(viewModel: TrashViewModel, userId: String, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-
-    val deletedDatas by viewModel.deletedDatas
-    val status by viewModel.status.collectAsState()
-
-    LaunchedEffect(userId) {
-        viewModel.retrieveDeletedDatas(userId)
-    }
+fun TrashContent(data: List<Reading>, userId: String, viewModel: TrashViewModel, modifier: Modifier = Modifier) {
+    val context: Context = LocalContext.current
 
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDeletePermanently by remember { mutableStateOf<Reading?>(null) }
@@ -162,77 +164,44 @@ fun TrashContent(viewModel: TrashViewModel, userId: String, modifier: Modifier =
     var showDialog by remember { mutableStateOf(false) }
 //    var itemToDelete by remember { mutableStateOf<BookAndReading?>(null) }
 
-    when (status) {
-        ApiStatus.LOADING -> {
-            Box(
-                modifier = modifier.fillMaxSize(), // Use the passed modifier
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+    if (data.isEmpty()) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.nodata_bin),
+                textAlign = TextAlign.Center
+            )
         }
-
-        ApiStatus.SUCCESS -> {
-            if (deletedDatas.isEmpty()) {
-                Column(
-                    modifier = modifier.fillMaxSize().padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+    } else {
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 84.dp)
+        ) {
+            items(data) { item ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.nodata_bin),
-                        textAlign = TextAlign.Center
+                    Box(modifier = Modifier.weight(1f)) {
+                        ListItem(reading = item) {}
+                    }
+                    TrashItemMenu(
+                        onRestore = {
+                            viewModel.restoreData(item.id, userId)
+                            Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
+                        },
+                        onDelete = {
+//                                    itemToDeletePermanently = item
+//                                    showDeleteItemDialog = true
+                        }
                     )
                 }
-            } else {
-                LazyColumn(
-                    modifier = modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 84.dp)
-                ) {
-                    items(deletedDatas) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                ListItem(reading = item) {}
-                            }
-                            TrashItemMenu(
-                                onRestore = {
-//                                    viewModel.restore(item.id)
-//                                    Toast.makeText(context, R.string.toast_restore, Toast.LENGTH_SHORT).show()
-                                },
-                                onDelete = {
-                                    itemToDeletePermanently = item
-                                    showDeleteItemDialog = true
-                                }
-                            )
-                        }
-                        HorizontalDivider()
-                    }
-                }
-            }
-        }
-
-        ApiStatus.FAILED -> {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.error),
-                    textAlign = TextAlign.Center
-                )
-                Button(
-                    onClick = { viewModel.retrieveDeletedDatas(userId) },
-                    modifier = Modifier.padding(top = 16.dp),
-                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-                ) {
-                    Text(text = stringResource(R.string.try_again))
-                }
+                HorizontalDivider()
             }
         }
     }

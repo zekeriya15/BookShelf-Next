@@ -69,6 +69,27 @@ class UpsertViewModel() : ViewModel() {
         }
     }
 
+    fun softDelete(readingId: Int, userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = ReadingsApi.service.updateDeletedStatus(
+                    readingId = readingId,
+                    userId = userId,
+                    isDeletedStatus = mapOf("isDeleted" to true)
+                )
+
+                if (result.status == "success") {
+                    retrieveDataById(readingId, userId)
+                } else {
+                    throw Exception(result.message)
+                }
+            } catch (e: Exception) {
+                Log.d("UpsertViewModel", "Failure: ${e.message}")
+                errorMessage.value = "Error: ${e.message}"
+            }
+        }
+    }
+
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
 
 //    fun insert(

@@ -73,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -227,7 +228,6 @@ fun MainScreen(navController: NavHostController) {
                 },
                 onDismissRequest = { showUpsertDialog = false },
                 onAddConfirmation = { title, author, genre, pages, bitmap ->
-//                    Log.d("TAMBAH", "$title, $author, $genre, $numOfPages")
                     viewModel.saveData(
                         userId = user.email,
                         bitmap = bitmap,
@@ -312,21 +312,6 @@ fun ScreenContent(showList: Boolean,
                         }
                     }
                 }
-//                else {
-//                    LazyVerticalStaggeredGrid(
-//                        modifier = modifier.fillMaxSize(),
-//                        columns = StaggeredGridCells.Fixed(2),
-//                        verticalItemSpacing = 8.dp,
-//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                        contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
-//                    ) {
-//                        items(data) {
-//                            GridItem(bookNreading = it) {
-//                                navController.navigate(Screen.DetailScreen.withId(it.readingId))
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
 
@@ -365,30 +350,30 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
     val pctFormat = String.format(Locale.US, "%.0f", pct)
 
 //    cek device bisa akses http dari ngrok or not
-    LaunchedEffect(imageUrl) {
-        if (imageUrl != null) {
-            withContext(Dispatchers.IO) {
-                try {
-                    val client = OkHttpClient()
-                    val request = Request.Builder()
-                        .url(imageUrl)
-                        .build()
-
-                    client.newCall(request).execute().use { response ->
-                        if (response.isSuccessful) {
-                            Log.d("ImageTest", "Image loaded successfully: ${response.code}")
-                        } else {
-                            Log.e("ImageTest", "Image load failed: ${response.code} - ${response.message}")
-                            // Log the response body if it's an error
-                            Log.e("ImageTest", "Response Body: ${response.body?.string()}")
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("ImageTest", "Image network error: ${e.message}", e)
-                }
-            }
-        }
-    }
+//    LaunchedEffect(imageUrl) {
+//        if (imageUrl != null) {
+//            withContext(Dispatchers.IO) {
+//                try {
+//                    val client = OkHttpClient()
+//                    val request = Request.Builder()
+//                        .url(imageUrl)
+//                        .build()
+//
+//                    client.newCall(request).execute().use { response ->
+//                        if (response.isSuccessful) {
+//                            Log.d("ImageTest", "Image loaded successfully: ${response.code}")
+//                        } else {
+//                            Log.e("ImageTest", "Image load failed: ${response.code} - ${response.message}")
+//                            // Log the response body if it's an error
+//                            Log.e("ImageTest", "Response Body: ${response.body?.string()}")
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                    Log.e("ImageTest", "Image network error: ${e.message}", e)
+//                }
+//            }
+//        }
+//    }
 
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -404,6 +389,8 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
                     .crossfade(true)
+                    .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
+                    .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
                     .build(),
                 contentDescription = stringResource(R.string.image, reading.title),
                 contentScale = ContentScale.Crop,

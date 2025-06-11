@@ -34,21 +34,6 @@ class MainViewModel() : ViewModel() {
         private set
 
 
-//    fun retrieveData() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            status.value = ApiStatus.LOADING
-//            try {
-//                val result = ReadingsApi.service.getReadings("__admin__")
-////                Log.d("MainViewModel", "Success $result")
-//                data.value = result
-//                status.value = ApiStatus.SUCCESS
-//            } catch (e: Exception) {
-//                Log.d("MainViewModel", "Failure: ${e.message}")
-//                status.value = ApiStatus.FAILED
-//            }
-//        }
-//    }
-
     fun retrieveData(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
@@ -56,7 +41,6 @@ class MainViewModel() : ViewModel() {
                 val result = ReadingsApi.service.getReadings(
                     userId,
                     "false")
-//                Log.d("MainViewModel", "Success $result")
                 data.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {

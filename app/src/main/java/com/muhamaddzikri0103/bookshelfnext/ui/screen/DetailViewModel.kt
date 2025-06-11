@@ -32,15 +32,12 @@ class DetailViewModel() : ViewModel() {
     private val _currentReading = MutableStateFlow<Reading?>(null)
     val currentReading: StateFlow<Reading?> = _currentReading
 
-//    private val _dialogBitmap = MutableStateFlow<Bitmap?>(null)
-//    val dialogBitmap: StateFlow<Bitmap?> = _dialogBitmap.asStateFlow()
-
     fun retrieveDataById(readingId: Int, userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ApiStatus.LOADING
             try {
                 val result = ReadingsApi.service.getReadingById(readingId, userId)
-//                Log.d("MainViewModel", "Success $result")
+
                 _currentReading.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {
@@ -92,24 +89,6 @@ class DetailViewModel() : ViewModel() {
         }
     }
 
-    fun deleteImage(readingId: Int, userId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val result = ReadingsApi.service.deleteImage(readingId, userId)
-
-                if (result.status == "success") {
-                    retrieveDataById(readingId, userId)
-                } else {
-                    throw Exception(result.message)
-                }
-            } catch (e: Exception) {
-                Log.d("DetailViewModel", "Failure: ${e.message}")
-                errorMessage.value = "Error: ${e.message}"
-            }
-        }
-    }
-
-
     fun updateData(
         readingId: Int, userId: String,
         bitmap: Bitmap?, title: String,
@@ -126,18 +105,14 @@ class DetailViewModel() : ViewModel() {
                 val pagesBody = pages.toString().toRequestBody("text/plain".toMediaTypeOrNull())
                 val currPageBody = currentPage.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
-//                val imagePart: MultipartBody.Part? = bitmap?.toMultipartBody()
-
                 val imagePart: MultipartBody.Part? = when {
                     bitmap != null -> {
-                        // New bitmap selected, send it
+                        // new bitmap selected
                         bitmap.toMultipartBody()
                     }
 
                     deleteImage -> {
-                        // User explicitly wants to delete the image.
-                        // Send an empty RequestBody with the "image" form-data name.
-                        // The filename part should be empty for the API to recognize it as a delete.
+                        // user wants to delete existing image
                         MultipartBody.Part.createFormData(
                             "image",
                             "",
@@ -146,8 +121,7 @@ class DetailViewModel() : ViewModel() {
                     }
 
                     else -> {
-                        // No new bitmap, and no explicit delete, so don't send an image part.
-                        // This means the existing image (if any) on the server remains.
+                        // image isnt updated, image remain unchanged
                         null
                     }
                 }

@@ -62,6 +62,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -89,15 +90,11 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
     val context: Context = LocalContext.current
 
     val viewModel: DetailViewModel = viewModel()
-
     val data by viewModel.currentReading.collectAsState()
     val status by viewModel.status.collectAsState()
     val errorMessage by viewModel.errorMessage
 
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
-//    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
-////        bitmap = getCroppedImage(context.contentResolver, it)
-//    }
 
     val launcher = rememberLauncherForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
@@ -156,7 +153,7 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
 
         if (errorMessage != null) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-            viewModel.errorMessage.value = null
+            viewModel.clearMessage()
         }
 
         when (status) {
@@ -314,7 +311,6 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
     Column(
         modifier = modifier
             .fillMaxSize()
-//            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -325,27 +321,13 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
                 modifier = modifier.fillMaxWidth().padding(bottom = 30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-//                    contentAlignment = Alignment.Center
             ) {
-                // --- CACHE BUSTING LOGIC ---
-                // 1. Parse the dateModified string to a Date object.
-                // 2. Get its timestamp (milliseconds since epoch).
-                // 3. Append this timestamp as a query parameter to the original imageUrl.
-                val cacheBusterTimestamp: Long = try {
-                    val parsedDate: Date? = inputFormatter.parse(data.dateModified)
-                    parsedDate?.time ?: System.currentTimeMillis() // Fallback if parsing fails
-                } catch (e: Exception) {
-                    Log.e("ReadingDetail", "Error parsing date for cache busting: ${data.dateModified}", e)
-                    System.currentTimeMillis() // Fallback to current time
-                }
-
-                val cacheBustedImageUrl = "$imageUrl?v=$cacheBusterTimestamp"
-                Log.d("ReadingDetail", "Loading image with cache-busted URL: $cacheBustedImageUrl")
-                // --- END CACHE BUSTING LOGIC ---
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(imageUrl)     // awalnya yg bener pake imageUrl
                         .crossfade(true)
+                        .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
+                        .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
                         .build(),
                     contentDescription = stringResource(R.string.image, title),
                     contentScale = ContentScale.Crop,
@@ -401,7 +383,7 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
                 if (parsedDate != null) {
                     outputFormatter.format(parsedDate)
                 } else {
-                    Log.e("ReadingDetail", "Parsed date is null for: $dateModified - check input format.")
+                    Log.e("ReadingDetail", "Parsed date is null for: $dateModified")
                     dateModified
                 }
             } catch (e: Exception) {

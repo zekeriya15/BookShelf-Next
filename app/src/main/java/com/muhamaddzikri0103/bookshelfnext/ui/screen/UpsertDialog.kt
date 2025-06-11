@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.text.isDigitsOnly
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.muhamaddzikri0103.bookshelfnext.R
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
@@ -127,34 +128,6 @@ fun UpsertDialog(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-//                if (reading?.imageUrl != null) {
-//                    AsyncImage(
-//                        model = ImageRequest.Builder(LocalContext.current)
-//                            .data(hasImage)
-//                            .crossfade(true)
-//                            .build(),
-//                        contentDescription = stringResource(R.string.image, reading.title),
-//                        contentScale = ContentScale.Crop,
-//                        placeholder = painterResource(R.drawable.loading_img),
-//                        error = painterResource(R.drawable.baseline_broken_image_24),
-//                        modifier = Modifier.width(80.dp)
-//                            .aspectRatio(2f / 3f)
-//                            .clip(RoundedCornerShape(10.dp))
-//                    )
-//                } else {
-//                    Image(
-//                        painter = if (bitmap != null) {
-//                            remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
-//                        } else {
-//                            painterResource(R.drawable.baseline_broken_image_24)
-//                        },
-//                        contentDescription = null,
-//                        modifier = Modifier.width(90.dp)
-//                            .aspectRatio(2f / 3f)
-//                            .clip(RoundedCornerShape(10.dp))
-//                    )
-//                }
-
                 // Display logic: prioritize new bitmap, then currentImageUrlInDialog
                 if (bitmap != null) {
                     Image(
@@ -169,6 +142,8 @@ fun UpsertDialog(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(currentImageUrlInDialog) // Use the dialog's internal state
                             .crossfade(true)
+                            .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
+                            .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
                             .build(),
                         contentDescription = stringResource(R.string.image, title), // Use local title
                         contentScale = ContentScale.Crop,
@@ -197,8 +172,6 @@ fun UpsertDialog(
                         onClick = {
                             onDeleteImage()
                             currentImageUrlInDialog = null
-//                            onDeleteImage()
-//                            hasImage = null
                         },
                         modifier = Modifier.padding(horizontal = 8.dp),
                         enabled = bitmap != null || currentImageUrlInDialog != null
@@ -209,15 +182,10 @@ fun UpsertDialog(
                         onClick = { onChangeImage() },
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
-//                        if (bitmap != null)
-//                            Text(text = stringResource(R.string.change))
-//                        else
-//                            Text(text = stringResource(R.string.add))
                         if (bitmap != null || currentImageUrlInDialog != null) // Check if there's an image currently
                             Text(text = stringResource(R.string.change))
                         else
                             Text(text = stringResource(R.string.add))
-
                     }
                 }
 
@@ -411,7 +379,7 @@ fun UpsertDialogPreview() {
             onDeleteImage = { },
             onChangeImage = { },
             onDismissRequest = { },
-            onAddConfirmation = { _, _, _, _, _-> },
+            onAddConfirmation = null,
             onEditConfirmation = null
         )
     }

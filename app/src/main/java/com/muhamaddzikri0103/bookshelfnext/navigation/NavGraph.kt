@@ -12,7 +12,6 @@ import com.muhamaddzikri0103.bookshelfnext.ui.screen.MainScreen
 import com.muhamaddzikri0103.bookshelfnext.ui.screen.READING_DETAIL_KEY_ID
 import com.muhamaddzikri0103.bookshelfnext.ui.screen.TrashScreen
 import com.muhamaddzikri0103.bookshelfnext.ui.screen.USER_KEY_ID
-import com.muhamaddzikri0103.bookshelfnext.ui.screen.UpsertScreen
 
 @Composable
 fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
@@ -22,9 +21,6 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
    ) {
        composable(route = Screen.Home.route) {
            MainScreen(navController)
-       }
-       composable(route = Screen.InsertForm.route) {
-           UpsertScreen(navController)
        }
        composable(
            route = Screen.DetailScreen.route,
@@ -36,16 +32,6 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
            val id = navBackStackEntry.arguments?.getInt(READING_DETAIL_KEY_ID) ?: return@composable
            val userId = navBackStackEntry.arguments?.getString(USER_KEY_ID) ?: return@composable
            DetailScreen(navController, id, userId)
-       }
-       composable(
-           route = Screen.UpdateForm.route,
-           arguments = listOf(
-               navArgument(READING_DETAIL_KEY_ID) { type = NavType.LongType }
-           )
-       ) { navBackStackEntry ->
-           val id = navBackStackEntry.arguments?.getLong(READING_DETAIL_KEY_ID)
-           UpsertScreen(navController, id)
-
        }
        composable(
            route = Screen.TrashScreen.route,

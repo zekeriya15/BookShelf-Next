@@ -10,7 +10,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,10 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -84,20 +80,15 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.muhamaddzikri0103.bookshelfnext.BuildConfig
 import com.muhamaddzikri0103.bookshelfnext.R
-import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
 import com.muhamaddzikri0103.bookshelfnext.model.User
 import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
-import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 import com.muhamaddzikri0103.bookshelfnext.network.SettingsDataStore
-//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
+import com.muhamaddzikri0103.bookshelfnext.ui.theme.BookShelfTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,7 +98,6 @@ fun MainScreen(navController: NavHostController) {
 
     val dataStore = SettingsDataStore(context)
     val user by dataStore.userFlow.collectAsState(User())
-    val showList by dataStore.layoutFlow.collectAsState(true)
 
     val viewModel: MainViewModel = viewModel()
     val errorMessage by viewModel.errorMessage
@@ -132,23 +122,6 @@ fun MainScreen(navController: NavHostController) {
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(onClick = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                        dataStore.saveLayout(!showList)
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(
-                                if (showList) R.drawable.baseline_grid_view_24
-                                else R.drawable.baseline_view_list_24
-                            ),
-                            contentDescription = stringResource(
-                                if (showList) R.string.grid
-                                else R.string.list
-                            ),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                     if (user.email.isNotEmpty()) {
                         IconButton(
                             onClick = {
@@ -196,7 +169,7 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(showList, user.email, viewModel, navController, Modifier.padding(innerPadding))
+        ScreenContent(user.email, viewModel, navController, Modifier.padding(innerPadding))
 
         if (showDialog) {
             ProfilDialog(
@@ -250,11 +223,11 @@ fun MainScreen(navController: NavHostController) {
 }
 
 @Composable
-fun ScreenContent(showList: Boolean,
-                  userId: String,
-                  viewModel: MainViewModel,
-                  navController: NavHostController,
-                  modifier: Modifier = Modifier
+fun ScreenContent(
+    userId: String,
+    viewModel: MainViewModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     val data by viewModel.data
     val status by viewModel.status.collectAsState()
@@ -299,17 +272,15 @@ fun ScreenContent(showList: Boolean,
                 }
             }
             else {
-                if (showList) {
-                    LazyColumn(
-                        modifier = modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 84.dp)
-                    ) {
-                        items(data) {
-                            ListItem(reading = it) {
-                                navController.navigate(Screen.DetailScreen.withId(it.id, userId))
-                            }
-                            HorizontalDivider()
+                LazyColumn(
+                    modifier = modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 84.dp)
+                ) {
+                    items(data) {
+                        ListItem(reading = it) {
+                            navController.navigate(Screen.DetailScreen.withId(it.id, userId))
                         }
+                        HorizontalDivider()
                     }
                 }
             }
@@ -420,45 +391,6 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
             Text(
                 text = reading.author,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
-            Text(
-                text = stringResource(R.string.x_completed, pctFormat),
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-@Composable
-fun GridItem(bookNreading: BookAndReading, onClick: () -> Unit) {
-    val numOfPages: Int = bookNreading.numOfPages
-    val currentPage: Int = bookNreading.currentPage
-    val pagesLeft: Int = numOfPages - currentPage
-    val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
-    val pctFormat = String.format(Locale.US, "%.0f", pct)
-
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, DividerDefaults.color)
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = bookNreading.title,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = bookNreading.author,
-                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))

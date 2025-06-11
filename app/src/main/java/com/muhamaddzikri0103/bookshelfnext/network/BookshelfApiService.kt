@@ -35,11 +35,6 @@ private val retrofit = Retrofit.Builder()
 interface BookshelfApiService {
     @GET("readings")
     suspend fun getReadings(
-        @Header("Authorization") userId: String
-    ): List<Reading>
-
-    @GET("readings")
-    suspend fun getReadings(
         @Header("Authorization") userId: String,
         @Query("is_deleted") isDeleted: String
     ): List<Reading>
@@ -87,30 +82,12 @@ interface BookshelfApiService {
         @Part("pages") pages: RequestBody
     ): OpStatus
 
-    @PATCH("readings/{id}/image")
-    suspend fun deleteImage(
-        @Path("id") readingId: Int,
-        @Header("Authorization") userId: String
-    ): OpStatus
-
     @Multipart
     @PUT("readings/{id}")
     suspend fun updateReading(
         @Path("id") readingId: Int,
         @Header("Authorization") userId: String,
         @Part image: MultipartBody.Part?,
-        @Part("title") title: RequestBody,
-        @Part("author") author: RequestBody,
-        @Part("genre") genre: RequestBody,
-        @Part("pages") pages: RequestBody,
-        @Part("currentPage") currentPage: RequestBody
-    ): OpStatus
-
-    @Multipart
-    @PUT("readings/{id}")
-    suspend fun updateReadingNoImage(
-        @Path("id") readingId: Int,
-        @Header("Authorization") userId: String,
         @Part("title") title: RequestBody,
         @Part("author") author: RequestBody,
         @Part("genre") genre: RequestBody,

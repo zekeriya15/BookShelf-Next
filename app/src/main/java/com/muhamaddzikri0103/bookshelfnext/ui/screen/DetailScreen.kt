@@ -1,5 +1,6 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
+//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -7,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -68,11 +67,8 @@ import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.muhamaddzikri0103.bookshelfnext.R
-import com.muhamaddzikri0103.bookshelfnext.model.BookAndReading
 import com.muhamaddzikri0103.bookshelfnext.model.Reading
-import com.muhamaddzikri0103.bookshelfnext.navigation.Screen
 import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
-//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -301,7 +297,7 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
     val author = data.author
     val genre = data.genre
     val numOfPages = data.pages
-    var dateModified by remember { mutableStateOf(data.dateModified) }
+    val dateModified by remember { mutableStateOf(data.dateModified) }
     val currentPage by remember { mutableIntStateOf(data.currentPage) }
 
     val pagesLeft: Int = numOfPages - currentPage

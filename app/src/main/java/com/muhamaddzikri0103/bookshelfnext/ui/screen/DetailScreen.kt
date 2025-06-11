@@ -79,7 +79,7 @@ import java.util.Locale
 const val READING_DETAIL_KEY_ID = "readingDetailId"
 const val USER_KEY_ID = "userId"
 
-private val inputFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.US)
+private val inputFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
 private val outputFormatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
 
 
@@ -95,8 +95,18 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
     val errorMessage by viewModel.errorMessage
 
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
-    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
-        bitmap = getCroppedImage(context.contentResolver, it)
+//    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
+////        bitmap = getCroppedImage(context.contentResolver, it)
+//    }
+
+    val launcher = rememberLauncherForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            bitmap = getCroppedImage(context.contentResolver, result)
+            Log.d("DetailScreen", "Crop successful. Bitmap is null: ${bitmap == null}. Bitmap size: ${bitmap?.byteCount} bytes")
+        } else {
+            Log.e("DetailScreen", "Crop failed: ${result.error?.message}")
+            bitmap = null // Ensure bitmap is null on failure
+        }
     }
 
     var showUpsertDialog by remember { mutableStateOf(false) }
@@ -146,6 +156,7 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
 
         if (errorMessage != null) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            viewModel.errorMessage.value = null
         }
 
         when (status) {
@@ -198,11 +209,18 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
         }
 
         if (showUpsertDialog) {
+            var deleteExistingImage by remember { mutableStateOf(false) }
+
             UpsertDialog(
                 reading = data,
                 bitmap = bitmap,
-                onDeleteImage = { bitmap = null },
+                onDeleteImage = {
+                    bitmap = null
+                    deleteExistingImage = true
+                },
                 onChangeImage = {
+                    deleteExistingImage = false
+
                     val options = CropImageContractOptions(
                         null, CropImageOptions(
                             imageSourceIncludeGallery = false,
@@ -214,9 +232,28 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
                     )
                     launcher.launch(options)
                 },
-                onDismissRequest = { showUpsertDialog = false },
+                onDismissRequest = {
+                    showUpsertDialog = false
+                    bitmap = null
+                    deleteExistingImage = false
+                },
                 onAddConfirmation = null,
-                onEditConfirmation = null
+                onEditConfirmation = { title, author, genre, pages, currentPage, newBitmap ->
+                    viewModel.updateData(
+                        readingId = id,
+                        userId = userId,
+                        bitmap = newBitmap,
+                        title = title,
+                        author = author,
+                        genre = genre,
+                        pages = pages,
+                        currentPage = currentPage,
+                        deleteImage = deleteExistingImage
+                    )
+                    showUpsertDialog = false
+                    bitmap = null
+                    deleteExistingImage = false
+                }
             )
         }
     }
@@ -268,7 +305,7 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
     val genre = data.genre
     val numOfPages = data.pages
     var dateModified by remember { mutableStateOf(data.dateModified) }
-    var currentPage by remember { mutableIntStateOf(data.currentPage) }
+    val currentPage by remember { mutableIntStateOf(data.currentPage) }
 
     val pagesLeft: Int = numOfPages - currentPage
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
@@ -290,9 +327,24 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
                 verticalArrangement = Arrangement.Center,
 //                    contentAlignment = Alignment.Center
             ) {
+                // --- CACHE BUSTING LOGIC ---
+                // 1. Parse the dateModified string to a Date object.
+                // 2. Get its timestamp (milliseconds since epoch).
+                // 3. Append this timestamp as a query parameter to the original imageUrl.
+                val cacheBusterTimestamp: Long = try {
+                    val parsedDate: Date? = inputFormatter.parse(data.dateModified)
+                    parsedDate?.time ?: System.currentTimeMillis() // Fallback if parsing fails
+                } catch (e: Exception) {
+                    Log.e("ReadingDetail", "Error parsing date for cache busting: ${data.dateModified}", e)
+                    System.currentTimeMillis() // Fallback to current time
+                }
+
+                val cacheBustedImageUrl = "$imageUrl?v=$cacheBusterTimestamp"
+                Log.d("ReadingDetail", "Loading image with cache-busted URL: $cacheBustedImageUrl")
+                // --- END CACHE BUSTING LOGIC ---
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)
+                        .data(imageUrl)     // awalnya yg bener pake imageUrl
                         .crossfade(true)
                         .build(),
                     contentDescription = stringResource(R.string.image, title),

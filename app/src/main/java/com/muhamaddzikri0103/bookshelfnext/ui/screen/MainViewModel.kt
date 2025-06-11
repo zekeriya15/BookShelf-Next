@@ -66,9 +66,11 @@ class MainViewModel() : ViewModel() {
         }
     }
 
-    fun saveData(userId: String, bitmap: Bitmap?,
-                title: String, author: String,
-                genre: String, pages: Int) {
+    fun saveData(
+        userId: String, bitmap: Bitmap?,
+        title: String, author: String,
+        genre: String, pages: Int
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val titleBody = title.toRequestBody("text/plain".toMediaTypeOrNull())

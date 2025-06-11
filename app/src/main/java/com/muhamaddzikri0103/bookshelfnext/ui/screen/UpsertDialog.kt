@@ -62,19 +62,21 @@ fun UpsertDialog(
     onChangeImage: () -> Unit,
     onDismissRequest: () -> Unit,
     onAddConfirmation: ((title: String, author: String,
-                     genre: String, numOfPages: Int,
+                     genre: String, pages: Int,
                      bitmap: Bitmap?) -> Unit)?,
     onEditConfirmation: ((title: String, author: String,
-                          genre: String, numOfPages: Int,
+                          genre: String, pages: Int,
                           currentPage: Int, bitmap: Bitmap?) -> Unit)?
 
 ) {
     val context: Context = LocalContext.current
 
+    var currentImageUrlInDialog by remember { mutableStateOf(reading?.imageUrl) }
+
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
 
-        val radioOptions = listOf(
+    val radioOptions = listOf(
         stringResource(R.string.romance),
         stringResource(R.string.mystery),
         stringResource(R.string.horror),
@@ -93,25 +95,27 @@ fun UpsertDialog(
     var currPages by remember { mutableStateOf("") }
 
     LaunchedEffect(reading) {
-        reading?.let { bookData ->
-            title = bookData.title
-            author = bookData.author
-            genre = bookData.genre
-            pages = bookData.pages.toString()
-            currPages = bookData.currentPage.toString()
+        reading?.let { readingData ->
+            title = readingData.title
+            author = readingData.author
+            genre = readingData.genre
+            pages = readingData.pages.toString()
+            currPages = readingData.currentPage.toString()
+            currentImageUrlInDialog = readingData.imageUrl
         } ?: run {
             title = ""
             author = ""
             genre = radioOptions[0]
             pages = ""
             currPages = "0"
+            currentImageUrlInDialog = null
         }
     }
 
-    var currentImage by remember { mutableStateOf<String?>(null) }
+    var hasImage by remember { mutableStateOf<String?>(null) }
 
     if (reading?.imageUrl != null) {
-        currentImage = reading.imageUrl
+        hasImage = reading.imageUrl
     }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
@@ -123,13 +127,50 @@ fun UpsertDialog(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (reading?.imageUrl != null) {
+//                if (reading?.imageUrl != null) {
+//                    AsyncImage(
+//                        model = ImageRequest.Builder(LocalContext.current)
+//                            .data(hasImage)
+//                            .crossfade(true)
+//                            .build(),
+//                        contentDescription = stringResource(R.string.image, reading.title),
+//                        contentScale = ContentScale.Crop,
+//                        placeholder = painterResource(R.drawable.loading_img),
+//                        error = painterResource(R.drawable.baseline_broken_image_24),
+//                        modifier = Modifier.width(80.dp)
+//                            .aspectRatio(2f / 3f)
+//                            .clip(RoundedCornerShape(10.dp))
+//                    )
+//                } else {
+//                    Image(
+//                        painter = if (bitmap != null) {
+//                            remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
+//                        } else {
+//                            painterResource(R.drawable.baseline_broken_image_24)
+//                        },
+//                        contentDescription = null,
+//                        modifier = Modifier.width(90.dp)
+//                            .aspectRatio(2f / 3f)
+//                            .clip(RoundedCornerShape(10.dp))
+//                    )
+//                }
+
+                // Display logic: prioritize new bitmap, then currentImageUrlInDialog
+                if (bitmap != null) {
+                    Image(
+                        painter = remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) },
+                        contentDescription = null,
+                        modifier = Modifier.width(90.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                } else if (currentImageUrlInDialog != null) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(currentImage)
+                            .data(currentImageUrlInDialog) // Use the dialog's internal state
                             .crossfade(true)
                             .build(),
-                        contentDescription = stringResource(R.string.image, reading.title),
+                        contentDescription = stringResource(R.string.image, title), // Use local title
                         contentScale = ContentScale.Crop,
                         placeholder = painterResource(R.drawable.loading_img),
                         error = painterResource(R.drawable.baseline_broken_image_24),
@@ -138,12 +179,9 @@ fun UpsertDialog(
                             .clip(RoundedCornerShape(10.dp))
                     )
                 } else {
+                    // No image
                     Image(
-                        painter = if (bitmap != null) {
-                            remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
-                        } else {
-                            painterResource(R.drawable.baseline_broken_image_24)
-                        },
+                        painter = painterResource(R.drawable.baseline_broken_image_24),
                         contentDescription = null,
                         modifier = Modifier.width(90.dp)
                             .aspectRatio(2f / 3f)
@@ -158,9 +196,12 @@ fun UpsertDialog(
                     OutlinedButton(
                         onClick = {
                             onDeleteImage()
-                            currentImage = null
+                            currentImageUrlInDialog = null
+//                            onDeleteImage()
+//                            hasImage = null
                         },
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        enabled = bitmap != null || currentImageUrlInDialog != null
                     ) {
                         Text(text = stringResource(R.string.delete))
                     }
@@ -168,7 +209,11 @@ fun UpsertDialog(
                         onClick = { onChangeImage() },
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
-                        if (bitmap != null)
+//                        if (bitmap != null)
+//                            Text(text = stringResource(R.string.change))
+//                        else
+//                            Text(text = stringResource(R.string.add))
+                        if (bitmap != null || currentImageUrlInDialog != null) // Check if there's an image currently
                             Text(text = stringResource(R.string.change))
                         else
                             Text(text = stringResource(R.string.add))

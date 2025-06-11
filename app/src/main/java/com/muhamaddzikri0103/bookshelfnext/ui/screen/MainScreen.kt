@@ -235,7 +235,7 @@ fun MainScreen(navController: NavHostController) {
                         author = author,
                         genre = genre,
                         pages = pages
-                        )
+                    )
                     showUpsertDialog = false
                 },
                 onEditConfirmation = null

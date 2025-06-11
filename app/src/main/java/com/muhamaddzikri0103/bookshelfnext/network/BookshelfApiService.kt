@@ -21,7 +21,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-private const val BASE_URL = "https://80a9-36-69-203-148.ngrok-free.app/"
+private const val BASE_URL = "https://bookshelf-api.zero-dev.my.id/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
@@ -104,7 +104,19 @@ interface BookshelfApiService {
         @Part("genre") genre: RequestBody,
         @Part("pages") pages: RequestBody,
         @Part("currentPage") currentPage: RequestBody
-    )
+    ): OpStatus
+
+    @Multipart
+    @PUT("readings/{id}")
+    suspend fun updateReadingNoImage(
+        @Path("id") readingId: Int,
+        @Header("Authorization") userId: String,
+        @Part("title") title: RequestBody,
+        @Part("author") author: RequestBody,
+        @Part("genre") genre: RequestBody,
+        @Part("pages") pages: RequestBody,
+        @Part("currentPage") currentPage: RequestBody
+    ): OpStatus
 }
 
 object ReadingsApi {

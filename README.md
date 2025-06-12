@@ -1,4 +1,4 @@
-# BookShelf
+# BookShelf Next
 ### A simple book reading tracking app
 
 

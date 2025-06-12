@@ -1,6 +1,5 @@
 package com.muhamaddzikri0103.bookshelfnext.ui.screen
 
-//import com.muhamaddzikri0103.bookshelfnext.util.ViewModelFactory
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -92,14 +91,8 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
 
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    val launcher = rememberLauncherForActivityResult(CropImageContract()) { result ->
-        if (result.isSuccessful) {
-            bitmap = getCroppedImage(context.contentResolver, result)
-            Log.d("DetailScreen", "Crop successful. Bitmap is null: ${bitmap == null}. Bitmap size: ${bitmap?.byteCount} bytes")
-        } else {
-            Log.e("DetailScreen", "Crop failed: ${result.error?.message}")
-            bitmap = null // Ensure bitmap is null on failure
-        }
+    val launcher = rememberLauncherForActivityResult(CropImageContract()) {
+        bitmap = getCroppedImage(context.contentResolver, it)
     }
 
     var showUpsertDialog by remember { mutableStateOf(false) }
@@ -216,7 +209,7 @@ fun DetailScreen(navController: NavHostController, id: Int, userId: String) {
 
                     val options = CropImageContractOptions(
                         null, CropImageOptions(
-                            imageSourceIncludeGallery = false,
+                            imageSourceIncludeGallery = true,
                             imageSourceIncludeCamera = true,
                             fixAspectRatio = true,
                             aspectRatioX = 2,
@@ -320,10 +313,10 @@ fun ReadingDetail(data: Reading, userId: String, viewModel: DetailViewModel, mod
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)     // awalnya yg bener pake imageUrl
+                        .data(imageUrl)
                         .crossfade(true)
-                        .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
-                        .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .diskCachePolicy(CachePolicy.DISABLED)
                         .build(),
                     contentDescription = stringResource(R.string.image, title),
                     contentScale = ContentScale.Crop,
@@ -454,7 +447,7 @@ fun ButtonNCounter(
                 )
                 IconButton(
                     onClick = {
-                        if (amount >= 0 && amount < pagesLeft) {
+                        if (amount in 0..<pagesLeft) {
                             amount++
                         }
                     },

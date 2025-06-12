@@ -10,7 +10,6 @@ import com.muhamaddzikri0103.bookshelfnext.network.ApiStatus
 import com.muhamaddzikri0103.bookshelfnext.network.ReadingsApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -19,14 +18,14 @@ import java.io.ByteArrayOutputStream
 
 class DetailViewModel : ViewModel() {
 
+    var currentReading = MutableStateFlow<Reading?>(null)
+        private set
+
     var status = MutableStateFlow(ApiStatus.LOADING)
         private set
 
     var errorMessage = mutableStateOf<String?>(null)
         private set
-
-    private val _currentReading = MutableStateFlow<Reading?>(null)
-    val currentReading: StateFlow<Reading?> = _currentReading
 
     fun retrieveDataById(readingId: Int, userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -34,7 +33,7 @@ class DetailViewModel : ViewModel() {
             try {
                 val result = ReadingsApi.service.getReadingById(readingId, userId)
 
-                _currentReading.value = result
+                currentReading.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {
                 Log.d("DetailViewModel", "Failure: ${e.message}")

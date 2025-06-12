@@ -29,7 +29,6 @@ class TrashViewModel : ViewModel() {
                 val result = ReadingsApi.service.getReadings(
                     userId,
                     "true")
-//                Log.d("MainViewModel", "Success $result")
                 deletedDatas.value = result
                 status.value = ApiStatus.SUCCESS
             } catch (e: Exception) {

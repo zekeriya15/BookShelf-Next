@@ -95,11 +95,10 @@ import java.util.Locale
 @Composable
 fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current
-
     val dataStore = SettingsDataStore(context)
-    val user by dataStore.userFlow.collectAsState(User())
 
     val viewModel: MainViewModel = viewModel()
+    val user by dataStore.userFlow.collectAsState(User())
     val errorMessage by viewModel.errorMessage
 
     var showDialog by remember { mutableStateOf(false) }
@@ -190,7 +189,7 @@ fun MainScreen(navController: NavHostController) {
                 onChangeImage = {
                     val options = CropImageContractOptions(
                         null, CropImageOptions(
-                            imageSourceIncludeGallery = false,
+                            imageSourceIncludeGallery = true,
                             imageSourceIncludeCamera = true,
                             fixAspectRatio = true,
                             aspectRatioX = 2,
@@ -320,36 +319,10 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
     val pct: Double = (currentPage.toDouble() / numOfPages.toDouble()) * 100
     val pctFormat = String.format(Locale.US, "%.0f", pct)
 
-//    cek device bisa akses http dari ngrok or not
-//    LaunchedEffect(imageUrl) {
-//        if (imageUrl != null) {
-//            withContext(Dispatchers.IO) {
-//                try {
-//                    val client = OkHttpClient()
-//                    val request = Request.Builder()
-//                        .url(imageUrl)
-//                        .build()
-//
-//                    client.newCall(request).execute().use { response ->
-//                        if (response.isSuccessful) {
-//                            Log.d("ImageTest", "Image loaded successfully: ${response.code}")
-//                        } else {
-//                            Log.e("ImageTest", "Image load failed: ${response.code} - ${response.message}")
-//                            // Log the response body if it's an error
-//                            Log.e("ImageTest", "Response Body: ${response.body?.string()}")
-//                        }
-//                    }
-//                } catch (e: Exception) {
-//                    Log.e("ImageTest", "Image network error: ${e.message}", e)
-//                }
-//            }
-//        }
-//    }
-
     Row(
         modifier = Modifier.fillMaxWidth()
-            .padding(16.dp)
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .padding(16.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -360,8 +333,8 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
                     .crossfade(true)
-                    .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
-                    .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .diskCachePolicy(CachePolicy.DISABLED)
                     .build(),
                 contentDescription = stringResource(R.string.image, reading.title),
                 contentScale = ContentScale.Crop,
@@ -378,7 +351,6 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(start = columnPadding.dp),
-//                .clickable { onClick() },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
@@ -393,7 +365,7 @@ fun ListItem(reading: Reading, onClick: () -> Unit) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(text = stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
+            Text(stringResource(R.string.x_left_x, pagesLeft.toString(), numOfPages.toString()))
             Text(
                 text = stringResource(R.string.x_completed, pctFormat),
                 fontWeight = FontWeight.SemiBold

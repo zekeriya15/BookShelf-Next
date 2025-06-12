@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -60,8 +63,8 @@ fun UpsertDialog(
     onChangeImage: () -> Unit,
     onDismissRequest: () -> Unit,
     onAddConfirmation: ((title: String, author: String,
-                     genre: String, pages: Int,
-                     bitmap: Bitmap?) -> Unit)?,
+                         genre: String, pages: Int,
+                         bitmap: Bitmap?) -> Unit)?,
     onEditConfirmation: ((title: String, author: String,
                           genre: String, pages: Int,
                           currentPage: Int, bitmap: Bitmap?) -> Unit)?
@@ -125,64 +128,67 @@ fun UpsertDialog(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Display logic: prioritize new bitmap, then currentImageUrlInDialog
-                if (bitmap != null) {
-                    Image(
-                        painter = remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) },
-                        contentDescription = null,
-                        modifier = Modifier.width(90.dp)
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(10.dp))
-                    )
-                } else if (currentImageUrlInDialog != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(currentImageUrlInDialog) // Use the dialog's internal state
-                            .crossfade(true)
-                            .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
-                            .diskCachePolicy(CachePolicy.DISABLED)   // Disable disk cache
-                            .build(),
-                        contentDescription = stringResource(R.string.image, title), // Use local title
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.loading_img),
-                        error = painterResource(R.drawable.baseline_broken_image_24),
-                        modifier = Modifier.width(80.dp)
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(10.dp))
-                    )
-                } else {
-                    // No image
-                    Image(
-                        painter = painterResource(R.drawable.baseline_broken_image_24),
-                        contentDescription = null,
-                        modifier = Modifier.width(90.dp)
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(10.dp))
-                    )
-                }
-
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp),
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(
-                        onClick = {
-                            onDeleteImage()
-                            currentImageUrlInDialog = null
-                        },
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        enabled = bitmap != null || currentImageUrlInDialog != null
-                    ) {
-                        Text(text = stringResource(R.string.delete))
+                    if (bitmap != null) {
+                        Image(
+                            painter = remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) },
+                            contentDescription = null,
+                            modifier = Modifier.width(90.dp)
+                                .aspectRatio(2f / 3f)
+                                .clip(RoundedCornerShape(10.dp))
+                        )
+                    } else if (currentImageUrlInDialog != null) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(currentImageUrlInDialog)
+                                .crossfade(true)
+                                .memoryCachePolicy(CachePolicy.DISABLED)
+                                .diskCachePolicy(CachePolicy.DISABLED)
+                                .build(),
+                            contentDescription = stringResource(R.string.image, title),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.loading_img),
+                            error = painterResource(R.drawable.baseline_broken_image_24),
+                            modifier = Modifier.width(90.dp)
+                                .aspectRatio(2f / 3f)
+                                .clip(RoundedCornerShape(10.dp))
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(R.drawable.baseline_broken_image_24),
+                            contentDescription = null,
+                            modifier = Modifier.width(90.dp)
+                                .aspectRatio(2f / 3f)
+                                .clip(RoundedCornerShape(10.dp))
+                        )
                     }
-                    OutlinedButton(
-                        onClick = { onChangeImage() },
-                        modifier = Modifier.padding(horizontal = 8.dp)
+
+                    Column (
+                        modifier = Modifier.padding(start = 16.dp),
                     ) {
-                        if (bitmap != null || currentImageUrlInDialog != null) // Check if there's an image currently
-                            Text(text = stringResource(R.string.change))
-                        else
-                            Text(text = stringResource(R.string.add))
+                        OutlinedButton(
+                            onClick = {
+                                onDeleteImage()
+                                currentImageUrlInDialog = null
+                            },
+                            enabled = bitmap != null || currentImageUrlInDialog != null
+                        ) {
+                            Text(
+                                text = stringResource(R.string.delete),
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(vertical = 3.dp))
+                        OutlinedButton(
+                            onClick = { onChangeImage() },
+                        ) {
+                            if (bitmap != null || currentImageUrlInDialog != null)
+                                Text(text = stringResource(R.string.change))
+                            else
+                                Text(text = stringResource(R.string.add))
+                        }
                     }
                 }
 
@@ -259,7 +265,7 @@ fun BookForm(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         OutlinedTextField(
             value = title,
@@ -302,7 +308,7 @@ fun BookForm(
             modifier = Modifier.fillMaxWidth()
         )
         if (isEditing) {
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary)
             OutlinedTextField(
                 value = currPages,
                 onValueChange = { if (it.isDigitsOnly()) onCurrPagesChange(it) },
